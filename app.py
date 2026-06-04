@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión FINAL - Estable
+# Versión FINAL - Fechas actualizan dashboard
 # ============================================
 
 import streamlit as st
@@ -105,13 +105,6 @@ st.markdown("""
         font-weight: bold;
         color: #FFD600 !important;
     }
-    
-    .fecha-horizontal {
-        display: flex;
-        gap: 20px;
-        align-items: flex-end;
-        margin-bottom: 15px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -209,7 +202,16 @@ def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, 
     return True, movimiento
 
 def obtener_postura_real_periodo(galpon_id, fecha_inicio, fecha_fin):
-    producciones_galpon = [p for p in produccion if p["galpon_id"] == galpon_id and fecha_inicio <= p["fecha"] <= fecha_fin]
+    """Calcula el porcentaje de postura real en un período de fechas"""
+    # Convertir fechas a string para comparar
+    fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d") if isinstance(fecha_inicio, datetime) else fecha_inicio
+    fecha_fin_str = fecha_fin.strftime("%Y-%m-%d") if isinstance(fecha_fin, datetime) else fecha_fin
+    
+    producciones_galpon = []
+    for p in produccion:
+        if p["galpon_id"] == galpon_id and fecha_inicio_str <= p["fecha"] <= fecha_fin_str:
+            producciones_galpon.append(p)
+    
     if not producciones_galpon:
         return 0
     total_huevos = sum(p["total_huevos"] for p in producciones_galpon)
@@ -220,7 +222,15 @@ def obtener_postura_real_periodo(galpon_id, fecha_inicio, fecha_fin):
     return round((promedio_diario / cantidad_gallinas) * 100, 1)
 
 def obtener_mortalidad_periodo(galpon_id, fecha_inicio, fecha_fin):
-    return sum(m["cantidad"] for m in movimientos_gallinas if m["galpon_id"] == galpon_id and m["tipo"] == "mortalidad" and fecha_inicio <= m["fecha"] <= fecha_fin)
+    """Calcula la mortalidad en un período de fechas"""
+    fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d") if isinstance(fecha_inicio, datetime) else fecha_inicio
+    fecha_fin_str = fecha_fin.strftime("%Y-%m-%d") if isinstance(fecha_fin, datetime) else fecha_fin
+    
+    mortalidad = 0
+    for m in movimientos_gallinas:
+        if m["galpon_id"] == galpon_id and m["tipo"] == "mortalidad" and fecha_inicio_str <= m["fecha"] <= fecha_fin_str:
+            mortalidad += m["cantidad"]
+    return mortalidad
 
 def registrar_produccion(galpon_id, fecha, clasificacion):
     nuevo_registro = {"id": len(produccion) + 1, "galpon_id": galpon_id, "fecha": fecha, "clasificacion": clasificacion, "total_huevos": sum(clasificacion.values())}
@@ -347,30 +357,33 @@ elif menu == "🐔 Producción":
     st.markdown("---")
     st.markdown("### 📊 Resumen de Inventario de Gallinas")
     
-    fecha_fin_default = datetime.now()
+    # Fechas por defecto (últimos 30 días)
+    fecha_fin_default = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     fecha_inicio_default = fecha_fin_default - timedelta(days=30)
     
-    if 'fecha_inicio' not in st.session_state:
-        st.session_state.fecha_inicio = fecha_inicio_default
-    if 'fecha_fin' not in st.session_state:
-        st.session_state.fecha_fin = fecha_fin_default
+    # Crear columnas para las fechas
+    col_f1, col_f2 = st.columns(2)
     
-    col_f1, col_f2, col_f3 = st.columns([1, 1, 3])
     with col_f1:
         st.markdown("📅 **Desde**")
-        fecha_inicio = st.date_input("", value=st.session_state.fecha_inicio, key="fecha_inicio_input", label_visibility="collapsed")
-        st.session_state.fecha_inicio = fecha_inicio
+        fecha_inicio = st.date_input("", value=fecha_inicio_default, key="fecha_inicio_input", label_visibility="collapsed")
+    
     with col_f2:
         st.markdown("📅 **Hasta**")
-        fecha_fin = st.date_input("", value=st.session_state.fecha_fin, key="fecha_fin_input", label_visibility="collapsed")
-        st.session_state.fecha_fin = fecha_fin
+        fecha_fin = st.date_input("", value=fecha_fin_default, key="fecha_fin_input", label_visibility="collapsed")
     
+    # Convertir a string para comparar
     fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d")
     fecha_fin_str = fecha_fin.strftime("%Y-%m-%d")
     
     st.caption(f"📌 Mostrando datos desde el **{fecha_inicio_str}** hasta el **{fecha_fin_str}**")
     st.markdown("---")
     
+    # Recargar datos para asegurar que estén actualizados
+    produccion = cargar_datos(PRODUCCION_FILE, [])
+    movimientos_gallinas = cargar_datos(MOVIMIENTOS_GALLINAS_FILE, [])
+    
+    # Tabla de resumen
     datos_resumen = []
     total_gallinas_generales = 0
     total_produccion_esperada = 0
@@ -381,8 +394,11 @@ elif menu == "🐔 Producción":
         total_gallinas_generales += cantidad
         produccion_esperada = int(cantidad * 0.9)
         total_produccion_esperada += produccion_esperada
+        
+        # Calcular mortalidad y postura con las fechas seleccionadas
         mortalidad_periodo = obtener_mortalidad_periodo(galpon_id, fecha_inicio_str, fecha_fin_str)
         postura_real = obtener_postura_real_periodo(galpon_id, fecha_inicio_str, fecha_fin_str)
+        
         estado_color = {"produccion": "🟢", "mantenimiento": "🟡", "descanso": "🔵", "descarte": "🔴"}.get(galpon["estado"], "⚪")
         if postura_real >= 85:
             indicador = "🟢 Normal"
@@ -390,6 +406,7 @@ elif menu == "🐔 Producción":
             indicador = "🟡 Atención"
         else:
             indicador = "🔴 Crítico"
+        
         datos_resumen.append({
             "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
             "Galpón": galpon["nombre"],
@@ -403,7 +420,10 @@ elif menu == "🐔 Producción":
     df_resumen = pd.DataFrame(datos_resumen)
     st.dataframe(df_resumen, use_container_width=True, hide_index=True)
     
-    total_mortalidad_periodo = sum(obtener_mortalidad_periodo(g["id"], fecha_inicio_str, fecha_fin_str) for g in galpones)
+    # Calcular total de mortalidad en el período
+    total_mortalidad_periodo = 0
+    for galpon in galpones:
+        total_mortalidad_periodo += obtener_mortalidad_periodo(galpon["id"], fecha_inicio_str, fecha_fin_str)
     
     col1, col2, col3 = st.columns(3)
     with col1:
