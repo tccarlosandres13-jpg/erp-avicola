@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión 2.1 - Con Inventario de Gallinas
+# Versión 2.3 - Botones horizontales en Producción
 # ============================================
 
 import streamlit as st
@@ -22,7 +22,7 @@ st.set_page_config(
 )
 
 # ============================================
-# CSS PERSONALIZADO (Colores Verde y Amarillo)
+# CSS PERSONALIZADO
 # ============================================
 
 st.markdown("""
@@ -55,28 +55,50 @@ st.markdown("""
         font-weight: bold;
     }
     
-    .stButton > button {
-        background-color: #2E7D32;
-        color: white;
-        border-radius: 25px;
-        padding: 10px 30px;
-        font-weight: bold;
-        border: none;
-        width: 100%;
+    /* Botones horizontales del mismo tamaño */
+    .horizontal-buttons {
+        display: flex;
+        gap: 15px;
+        margin: 20px 0;
     }
     
-    .stButton > button:hover {
-        background-color: #F9A825;
+    .horz-btn {
+        flex: 1;
+        text-align: center;
+        padding: 12px 0;
+        border-radius: 25px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    /* Métricas */
+    [data-testid="stMetricValue"] {
         color: #2E7D32;
     }
     
-    .stTextInput > div > div > input {
-        border-radius: 25px;
-        border: 2px solid #FFD600;
-        padding: 8px 15px;
-        font-size: 14px;
+    /* Tarjeta de resumen */
+    .summary-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-left: 5px solid #2E7D32;
     }
     
+    .summary-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2E7D32;
+    }
+    
+    .summary-label {
+        font-size: 12px;
+        color: #666;
+    }
+    
+    /* Sidebar */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);
     }
@@ -92,24 +114,28 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
-    [data-testid="stMetricValue"] {
+    /* Inputs */
+    .stTextInput > div > div > input {
+        border-radius: 25px;
+        border: 2px solid #FFD600;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+    
+    /* Botón personalizado */
+    .stButton > button {
+        background-color: #2E7D32;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 30px;
+        font-weight: bold;
+        border: none;
+        width: 100%;
+    }
+    
+    .stButton > button:hover {
+        background-color: #F9A825;
         color: #2E7D32;
-    }
-    
-    /* Pestañas */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 20px;
-        padding: 8px 20px;
-        background-color: #E8F5E9;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background-color: #2E7D32 !important;
-        color: white !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -180,10 +206,8 @@ CATEGORIAS_POR_DEFECTO = {
 }
 
 INVENTARIO_GALLINAS_POR_DEFECTO = {}
-
 MOVIMIENTOS_GALLINAS_POR_DEFECTO = []
 
-# Cargar datos
 usuarios = cargar_datos(USUARIOS_FILE, USUARIOS_POR_DEFECTO)
 galpones = cargar_datos(GALPONES_FILE, GALPONES_POR_DEFECTO)
 produccion = cargar_datos(PRODUCCION_FILE, [])
@@ -192,7 +216,6 @@ categorias_data = cargar_datos(CATEGORIAS_FILE, CATEGORIAS_POR_DEFECTO)
 inventario_gallinas = cargar_datos(INVENTARIO_GALLINAS_FILE, INVENTARIO_GALLINAS_POR_DEFECTO)
 movimientos_gallinas = cargar_datos(MOVIMIENTOS_GALLINAS_FILE, MOVIMIENTOS_GALLINAS_POR_DEFECTO)
 
-# Inicializar inventario de gallinas con los datos de galpones
 if not inventario_gallinas:
     for g in galpones:
         inventario_gallinas[str(g["id"])] = {
@@ -202,7 +225,6 @@ if not inventario_gallinas:
         }
     guardar_datos(INVENTARIO_GALLINAS_FILE, inventario_gallinas)
 
-# Inicializar inventario de huevos
 if not inventario_huevos:
     for cat in categorias_data["categorias"]:
         inventario_huevos[f"Bodega1_{cat}"] = 0
@@ -214,12 +236,10 @@ if not inventario_huevos:
 # ============================================
 
 def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, fecha):
-    """Registra un movimiento de gallinas (mortalidad, levante, descarte)"""
     galpon = next((g for g in galpones if g["id"] == galpon_id), None)
     if not galpon:
         return False, "Galpón no encontrado"
     
-    # Obtener cantidad actual
     cantidad_actual = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
     
     if tipo_movimiento == "mortalidad":
@@ -235,7 +255,6 @@ def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, 
     else:
         return False, "Tipo de movimiento no válido"
     
-    # Guardar movimiento
     movimiento = {
         "id": len(movimientos_gallinas) + 1,
         "galpon_id": galpon_id,
@@ -250,7 +269,6 @@ def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, 
     movimientos_gallinas.append(movimiento)
     guardar_datos(MOVIMIENTOS_GALLINAS_FILE, movimientos_gallinas)
     
-    # Actualizar inventario
     inventario_gallinas[str(galpon_id)] = {
         "nombre": galpon["nombre"],
         "cantidad": nueva_cantidad,
@@ -258,7 +276,6 @@ def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, 
     }
     guardar_datos(INVENTARIO_GALLINAS_FILE, inventario_gallinas)
     
-    # Actualizar galpones
     for g in galpones:
         if g["id"] == galpon_id:
             g["cantidad_gallinas"] = nueva_cantidad
@@ -266,6 +283,26 @@ def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, 
     guardar_datos(GALPONES_FILE, galpones)
     
     return True, movimiento
+
+def obtener_postura_real(galpon_id):
+    producciones_galpon = [p for p in produccion if p["galpon_id"] == galpon_id]
+    if not producciones_galpon:
+        return 0
+    ultimas = producciones_galpon[-7:] if len(producciones_galpon) >= 7 else producciones_galpon
+    total_huevos = sum(p["total_huevos"] for p in ultimas)
+    promedio_diario = total_huevos / len(ultimas)
+    cantidad_gallinas = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
+    if cantidad_gallinas == 0:
+        return 0
+    return round((promedio_diario / cantidad_gallinas) * 100, 1)
+
+def obtener_mortalidad_mes(galpon_id):
+    mes_actual = datetime.now().strftime("%Y-%m")
+    mortalidad = sum(m["cantidad"] for m in movimientos_gallinas 
+                     if m["galpon_id"] == galpon_id 
+                     and m["tipo"] == "mortalidad" 
+                     and m["fecha"].startswith(mes_actual))
+    return mortalidad
 
 # ============================================
 # FUNCIONES DE PRODUCCIÓN DE HUEVOS
@@ -320,7 +357,7 @@ if not st.session_state.logged_in:
         
         logo = cargar_logo()
         if logo:
-            st.image(logo, width=150, use_container_width=False)
+            st.image(logo, width=150)
         else:
             st.markdown('<div style="text-align: center;"><span style="font-size: 100px;">🥚</span></div>', unsafe_allow_html=True)
         
@@ -390,7 +427,7 @@ if st.sidebar.button("🚪 Cerrar Sesión"):
     st.rerun()
 
 # ============================================
-# MÓDULO: DASHBOARD
+# MÓDULO: DASHBOARD GENERAL
 # ============================================
 if menu == "🏠 Dashboard":
     st.title("🏠 Dashboard - Resumen del Día")
@@ -402,11 +439,8 @@ if menu == "🏠 Dashboard":
     total_hoy = sum(p["total_huevos"] for p in produccion_hoy) if produccion_hoy else 0
     
     total_inventario = inventario_huevos.get("Bodega1_total", 0)
-    
-    # Total gallinas vivas
     total_gallinas = sum(g.get("cantidad", 0) for g in inventario_gallinas.values())
     
-    # Mortalidad del mes
     mes_actual = datetime.now().strftime("%Y-%m")
     mortalidad_mes = sum(m["cantidad"] for m in movimientos_gallinas 
                          if m["tipo"] == "mortalidad" and m["fecha"].startswith(mes_actual))
@@ -427,32 +461,119 @@ if menu == "🏠 Dashboard":
         st.info("No hay registros de producción aún.")
 
 # ============================================
-# MÓDULO: PRODUCCIÓN (AHORA CON INVENTARIO DE GALLINAS)
+# MÓDULO: PRODUCCIÓN (CON BOTONES HORIZONTALES)
 # ============================================
 elif menu == "🐔 Producción":
     st.title("🐔 Gestión de Producción")
     
-    # Crear pestañas dentro de Producción
-    tab1, tab2, tab3 = st.tabs(["📝 Registrar Producción", "🐔 Inventario de Gallinas", "📜 Historial de Gallinas"])
+    # ========== DASHBOARD DE INVENTARIO DE GALLINAS ==========
+    st.markdown("### 📊 Resumen de Inventario de Gallinas")
     
-    # ==================== TAB 1: REGISTRAR PRODUCCIÓN ====================
-    with tab1:
+    # Preparar datos para la tabla
+    datos_resumen = []
+    total_gallinas_generales = 0
+    total_produccion_esperada = 0
+    
+    for galpon in galpones:
+        galpon_id = galpon["id"]
+        cantidad = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
+        total_gallinas_generales += cantidad
+        
+        produccion_esperada = int(cantidad * 0.9)
+        total_produccion_esperada += produccion_esperada
+        
+        mortalidad_mes = obtener_mortalidad_mes(galpon_id)
+        postura_real = obtener_postura_real(galpon_id)
+        
+        estado_color = {
+            "produccion": "🟢",
+            "mantenimiento": "🟡",
+            "descanso": "🔵",
+            "descarte": "🔴"
+        }.get(galpon["estado"], "⚪")
+        
+        datos_resumen.append({
+            "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
+            "Galpón": galpon["nombre"],
+            "Gallinas actuales": f"{cantidad:,}",
+            "Prod. esperada (90%)": f"{produccion_esperada:,}",
+            "Mortalidad (mes)": f"{mortalidad_mes:,}",
+            "Postura real": f"{postura_real}%",
+            "Indicador": "🟢 Normal" if postura_real >= 85 else "🟡 Atención" if postura_real >= 70 else "🔴 Crítico"
+        })
+    
+    df_resumen = pd.DataFrame(datos_resumen)
+    st.dataframe(df_resumen, use_container_width=True, hide_index=True)
+    
+    # Tarjetas de resumen
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(f"""
+        <div class="summary-card">
+            <div class="summary-number">{total_gallinas_generales:,}</div>
+            <div class="summary-label">🐔 TOTAL GALLINAS EN PRODUCCIÓN</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"""
+        <div class="summary-card">
+            <div class="summary-number">{total_produccion_esperada:,}</div>
+            <div class="summary-label">🥚 PRODUCCIÓN ESPERADA (90%)</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        capacidad = (total_gallinas_generales / 100000) * 100 if total_gallinas_generales > 0 else 0
+        st.markdown(f"""
+        <div class="summary-card">
+            <div class="summary-number">{round(capacidad, 1)}%</div>
+            <div class="summary-label">📊 OCUPACIÓN DE CAPACIDAD</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # ========== BOTONES HORIZONTALES ==========
+    # Inicializar estado del botón seleccionado
+    if 'prod_submenu' not in st.session_state:
+        st.session_state.prod_submenu = "registrar"
+    
+    # Crear 3 columnas para los botones (mismo ancho)
+    col_b1, col_b2, col_b3 = st.columns(3)
+    
+    with col_b1:
+        if st.button("📝 Registrar Producción", key="btn_registrar", use_container_width=True):
+            st.session_state.prod_submenu = "registrar"
+    
+    with col_b2:
+        if st.button("🐔 Inventario Gallinas", key="btn_inventario", use_container_width=True):
+            st.session_state.prod_submenu = "inventario"
+    
+    with col_b3:
+        if st.button("📜 Historial Gallinas", key="btn_historial", use_container_width=True):
+            st.session_state.prod_submenu = "historial"
+    
+    st.markdown("---")
+    
+    # ========== CONTENIDO SEGÚN BOTÓN SELECCIONADO ==========
+    
+    # Opción 1: REGISTRAR PRODUCCIÓN
+    if st.session_state.prod_submenu == "registrar":
         col1, col2 = st.columns(2)
         
         with col1:
             galpones_activos = [g for g in galpones if g["estado"] == "produccion" and g["cantidad_gallinas"] > 0]
             if not galpones_activos:
-                st.warning("⚠️ No hay galpones activos con gallinas. Registra ingreso de levante en 'Inventario de Gallinas'.")
+                st.warning("⚠️ No hay galpones activos con gallinas. Registra ingreso de levante en 'Inventario Gallinas'.")
             else:
                 galpon_seleccionado = st.selectbox(
                     "Seleccione el galpón",
                     galpones_activos,
-                    format_func=lambda x: f"{x['nombre']} ({x['cantidad_gallinas']:,} gallinas)"
+                    format_func=lambda x: f"{x['nombre']} ({x['cantidad_gallinas']:,} gallinas)",
+                    key="prod_galpon"
                 )
                 
                 fecha = st.date_input("Fecha de producción", datetime.now())
                 
-                # Mostrar producción esperada (90% de postura)
                 gallinas_galpon = galpon_seleccionado["cantidad_gallinas"]
                 produccion_esperada = int(gallinas_galpon * 0.9)
                 st.info(f"📊 Producción esperada (90%): {produccion_esperada:,} huevos")
@@ -464,7 +585,7 @@ elif menu == "🐔 Producción":
                 cols = st.columns(2)
                 for i, cat in enumerate(categorias_data["categorias"]):
                     with cols[i % 2]:
-                        clasificacion[cat] = st.number_input(f"{cat}", min_value=0, value=0, step=100)
+                        clasificacion[cat] = st.number_input(f"{cat}", min_value=0, value=0, step=100, key=f"cat_{cat}")
                 
                 total_ingresado = sum(clasificacion.values())
                 st.info(f"📊 Total de huevos a registrar: {total_ingresado:,}")
@@ -506,22 +627,23 @@ elif menu == "🐔 Producción":
                     galpon = next((g["nombre"] for g in galpones if g["id"] == p["galpon_id"]), "?")
                     st.write(f"**{galpon}**: {p['total_huevos']:,} huevos")
     
-    # ==================== TAB 2: INVENTARIO DE GALLINAS ====================
-    with tab2:
+    # Opción 2: INVENTARIO DE GALLINAS
+    elif st.session_state.prod_submenu == "inventario":
         st.subheader("🐔 Estado actual de galpones")
         
-        # Mostrar tabla de inventario actual
         datos_galpones = []
         for g in galpones:
             cantidad_actual = inventario_gallinas.get(str(g["id"]), {}).get("cantidad", 0)
+            postura_real = obtener_postura_real(g["id"])
             datos_galpones.append({
                 "Galpón": g["nombre"],
                 "Gallinas actuales": f"{cantidad_actual:,}",
                 "Estado": g["estado"],
+                "Postura real": f"{postura_real}%",
                 "Capacidad máxima": "100,000" if "Levante" not in g["nombre"] else "50,000"
             })
         
-        st.dataframe(pd.DataFrame(datos_galpones), use_container_width=True)
+        st.dataframe(pd.DataFrame(datos_galpones), use_container_width=True, hide_index=True)
         
         st.write("---")
         st.subheader("📝 Registrar movimiento de gallinas")
@@ -543,11 +665,12 @@ elif menu == "🐔 Producción":
                     "levante": "➕ Ingreso de levante (nuevas gallinas)",
                     "mortalidad": "⚠️ Mortalidad (gallinas muertas)",
                     "descarte": "📤 Descarte (gallinas retiradas)"
-                }.get(x, x)
+                }.get(x, x),
+                key="tipo_mov"
             )
         
         with col2:
-            cantidad_mov = st.number_input("Cantidad de gallinas", min_value=1, value=1, step=10)
+            cantidad_mov = st.number_input("Cantidad de gallinas", min_value=1, value=1, step=10, key="cant_mov")
             
             motivos = {
                 "levante": ["Llegada de pollitas", "Traslado desde levante", "Compra de aves"],
@@ -555,14 +678,13 @@ elif menu == "🐔 Producción":
                 "descarte": ["Fin de ciclo", "Baja producción", "Enfermedad crónica", "Renovación de lote"]
             }
             
-            motivo = st.selectbox("Motivo", motivos.get(tipo_movimiento, ["Otro"]))
-            
-            motivo_extra = st.text_input("Observaciones adicionales (opcional)", placeholder="Detalles específicos...")
+            motivo = st.selectbox("Motivo", motivos.get(tipo_movimiento, ["Otro"]), key="motivo")
+            motivo_extra = st.text_input("Observaciones adicionales (opcional)", placeholder="Detalles específicos...", key="motivo_extra")
             motivo_completo = motivo + (f" - {motivo_extra}" if motivo_extra else "")
         
-        fecha_mov = st.date_input("Fecha del movimiento", datetime.now())
+        fecha_mov = st.date_input("Fecha del movimiento", datetime.now(), key="fecha_mov")
         
-        if st.button("✅ Registrar movimiento", type="primary"):
+        if st.button("✅ Registrar movimiento", type="primary", key="btn_mov"):
             cantidad_actual = inventario_gallinas.get(str(galpon_mov["id"]), {}).get("cantidad", 0)
             
             if tipo_movimiento == "mortalidad" and cantidad_mov > cantidad_actual:
@@ -589,50 +711,50 @@ elif menu == "🐔 Producción":
                 else:
                     st.error(f"❌ {resultado}")
     
-    # ==================== TAB 3: HISTORIAL DE GALLINAS ====================
-    with tab3:
+    # Opción 3: HISTORIAL DE GALLINAS
+    elif st.session_state.prod_submenu == "historial":
         st.subheader("📜 Historial de movimientos de gallinas")
         
         if movimientos_gallinas:
-            # Filtros
             col1, col2 = st.columns(2)
             with col1:
-                tipos = ["Todos"] + list(set(m["tipo"] for m in movimientos_gallinas))
-                filtro_tipo = st.selectbox("Filtrar por tipo", tipos)
+                tipos = ["Todos"] + sorted(list(set(m["tipo"] for m in movimientos_gallinas)))
+                filtro_tipo = st.selectbox("Filtrar por tipo", tipos, key="filtro_tipo")
             with col2:
                 fechas = sorted(set(m["fecha"] for m in movimientos_gallinas), reverse=True)
-                filtro_fecha = st.selectbox("Filtrar por fecha", ["Todas"] + fechas)
+                filtro_fecha = st.selectbox("Filtrar por fecha", ["Todas"] + fechas, key="filtro_fecha")
             
-            # Filtrar datos
             movimientos_filtrados = movimientos_gallinas.copy()
             if filtro_tipo != "Todos":
                 movimientos_filtrados = [m for m in movimientos_filtrados if m["tipo"] == filtro_tipo]
             if filtro_fecha != "Todas":
                 movimientos_filtrados = [m for m in movimientos_filtrados if m["fecha"] == filtro_fecha]
             
-            # Mostrar tabla
-            df_movimientos = pd.DataFrame(movimientos_filtrados[::-1])
-            df_movimientos["tipo_icono"] = df_movimientos["tipo"].map({
-                "levante": "➕", "mortalidad": "⚠️", "descarte": "📤"
-            })
-            df_mostrar = df_movimientos[["fecha", "tipo_icono", "galpon_nombre", "cantidad", "motivo", "cantidad_anterior", "cantidad_nueva"]]
-            df_mostrar.columns = ["Fecha", " ", "Galpón", "Cantidad", "Motivo", "Anterior", "Nueva"]
-            st.dataframe(df_mostrar, use_container_width=True)
-            
-            # Resumen estadístico
-            st.write("---")
-            st.subheader("📊 Resumen de movimientos")
-            
-            col1, col2, col3 = st.columns(3)
-            total_levante = sum(m["cantidad"] for m in movimientos_gallinas if m["tipo"] == "levante")
-            total_mortalidad = sum(m["cantidad"] for m in movimientos_gallinas if m["tipo"] == "mortalidad")
-            total_descarte = sum(m["cantidad"] for m in movimientos_gallinas if m["tipo"] == "descarte")
-            
-            col1.metric("➕ Total Levante", f"{total_levante:,}")
-            col2.metric("⚠️ Total Mortalidad", f"{total_mortalidad:,}")
-            col3.metric("📤 Total Descarte", f"{total_descarte:,}")
+            if movimientos_filtrados:
+                df_movimientos = pd.DataFrame(movimientos_filtrados[::-1])
+                df_movimientos["tipo_icono"] = df_movimientos["tipo"].map({
+                    "levante": "➕", "mortalidad": "⚠️", "descarte": "📤"
+                })
+                df_mostrar = df_movimientos[["fecha", "tipo_icono", "galpon_nombre", "cantidad", "motivo", "cantidad_anterior", "cantidad_nueva"]]
+                df_mostrar.columns = ["Fecha", " ", "Galpón", "Cantidad", "Motivo", "Anterior", "Nueva"]
+                st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
+                
+                # Resumen estadístico
+                st.write("---")
+                st.subheader("📊 Resumen de movimientos")
+                
+                col1, col2, col3 = st.columns(3)
+                total_levante = sum(m["cantidad"] for m in movimientos_filtrados if m["tipo"] == "levante")
+                total_mortalidad = sum(m["cantidad"] for m in movimientos_filtrados if m["tipo"] == "mortalidad")
+                total_descarte = sum(m["cantidad"] for m in movimientos_filtrados if m["tipo"] == "descarte")
+                
+                col1.metric("➕ Total Levante", f"{total_levante:,}")
+                col2.metric("⚠️ Total Mortalidad", f"{total_mortalidad:,}")
+                col3.metric("📤 Total Descarte", f"{total_descarte:,}")
+            else:
+                st.info("No hay movimientos con los filtros seleccionados.")
         else:
-            st.info("No hay movimientos registrados aún. Usa 'Inventario de Gallinas' para registrar ingresos o mortalidad.")
+            st.info("No hay movimientos registrados aún. Usa 'Inventario Gallinas' para registrar ingresos o mortalidad.")
 
 # ============================================
 # MÓDULO: INVENTARIO HUEVOS
@@ -658,7 +780,7 @@ elif menu == "📦 Inventario Huevos":
             })
     
     if datos_inventario:
-        st.dataframe(pd.DataFrame(datos_inventario), use_container_width=True)
+        st.dataframe(pd.DataFrame(datos_inventario), use_container_width=True, hide_index=True)
     else:
         st.info("No hay inventario registrado aún")
 
@@ -731,7 +853,7 @@ elif menu == "📊 Reportes":
                 lambda x: next((g["nombre"] for g in galpones if g["id"] == x), "?")
             )
             df_mostrar = df_mostrar.rename(columns={"fecha": "Fecha", "total_huevos": "Total Huevos"})
-            st.dataframe(df_mostrar[["Fecha", "galpon", "Total Huevos"]], use_container_width=True)
+            st.dataframe(df_mostrar[["Fecha", "galpon", "Total Huevos"]], use_container_width=True, hide_index=True)
         else:
             st.info("No hay datos en el período seleccionado")
     else:
@@ -824,7 +946,6 @@ elif menu == "⚙️ Configuración":
                     "estado": estado_galpon
                 })
                 guardar_datos(GALPONES_FILE, galpones)
-                # Sincronizar inventario de gallinas
                 inventario_gallinas[str(nuevo_id)] = {
                     "nombre": nombre_galpon,
                     "cantidad": gallinas_galpon,
