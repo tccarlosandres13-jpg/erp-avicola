@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión 2.3 - Botones horizontales en Producción
+# Versión 2.5 - Botones arriba sin dashboard por defecto
 # ============================================
 
 import streamlit as st
@@ -55,29 +55,25 @@ st.markdown("""
         font-weight: bold;
     }
     
-    /* Botones horizontales del mismo tamaño */
-    .horizontal-buttons {
-        display: flex;
-        gap: 15px;
-        margin: 20px 0;
-    }
-    
-    .horz-btn {
-        flex: 1;
-        text-align: center;
-        padding: 12px 0;
+    .stButton > button {
+        background-color: #2E7D32;
+        color: white;
         border-radius: 25px;
+        padding: 10px 30px;
         font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        border: none;
+        width: 100%;
     }
     
-    /* Métricas */
+    .stButton > button:hover {
+        background-color: #F9A825;
+        color: #2E7D32;
+    }
+    
     [data-testid="stMetricValue"] {
         color: #2E7D32;
     }
     
-    /* Tarjeta de resumen */
     .summary-card {
         background-color: white;
         border-radius: 15px;
@@ -98,7 +94,6 @@ st.markdown("""
         color: #666;
     }
     
-    /* Sidebar */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);
     }
@@ -114,28 +109,11 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
-    /* Inputs */
     .stTextInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #FFD600;
         padding: 8px 15px;
         font-size: 14px;
-    }
-    
-    /* Botón personalizado */
-    .stButton > button {
-        background-color: #2E7D32;
-        color: white;
-        border-radius: 25px;
-        padding: 10px 30px;
-        font-weight: bold;
-        border: none;
-        width: 100%;
-    }
-    
-    .stButton > button:hover {
-        background-color: #F9A825;
-        color: #2E7D32;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -290,7 +268,7 @@ def obtener_postura_real(galpon_id):
         return 0
     ultimas = producciones_galpon[-7:] if len(producciones_galpon) >= 7 else producciones_galpon
     total_huevos = sum(p["total_huevos"] for p in ultimas)
-    promedio_diario = total_huevos / len(ultimas)
+    promedio_diario = total_huevos / len(ultimas) if ultimas else 0
     cantidad_gallinas = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
     if cantidad_gallinas == 0:
         return 0
@@ -461,83 +439,16 @@ if menu == "🏠 Dashboard":
         st.info("No hay registros de producción aún.")
 
 # ============================================
-# MÓDULO: PRODUCCIÓN (CON BOTONES HORIZONTALES)
+# MÓDULO: PRODUCCIÓN (SOLO BOTONES AL ENTRAR)
 # ============================================
 elif menu == "🐔 Producción":
     st.title("🐔 Gestión de Producción")
     
-    # ========== DASHBOARD DE INVENTARIO DE GALLINAS ==========
-    st.markdown("### 📊 Resumen de Inventario de Gallinas")
-    
-    # Preparar datos para la tabla
-    datos_resumen = []
-    total_gallinas_generales = 0
-    total_produccion_esperada = 0
-    
-    for galpon in galpones:
-        galpon_id = galpon["id"]
-        cantidad = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
-        total_gallinas_generales += cantidad
-        
-        produccion_esperada = int(cantidad * 0.9)
-        total_produccion_esperada += produccion_esperada
-        
-        mortalidad_mes = obtener_mortalidad_mes(galpon_id)
-        postura_real = obtener_postura_real(galpon_id)
-        
-        estado_color = {
-            "produccion": "🟢",
-            "mantenimiento": "🟡",
-            "descanso": "🔵",
-            "descarte": "🔴"
-        }.get(galpon["estado"], "⚪")
-        
-        datos_resumen.append({
-            "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
-            "Galpón": galpon["nombre"],
-            "Gallinas actuales": f"{cantidad:,}",
-            "Prod. esperada (90%)": f"{produccion_esperada:,}",
-            "Mortalidad (mes)": f"{mortalidad_mes:,}",
-            "Postura real": f"{postura_real}%",
-            "Indicador": "🟢 Normal" if postura_real >= 85 else "🟡 Atención" if postura_real >= 70 else "🔴 Crítico"
-        })
-    
-    df_resumen = pd.DataFrame(datos_resumen)
-    st.dataframe(df_resumen, use_container_width=True, hide_index=True)
-    
-    # Tarjetas de resumen
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"""
-        <div class="summary-card">
-            <div class="summary-number">{total_gallinas_generales:,}</div>
-            <div class="summary-label">🐔 TOTAL GALLINAS EN PRODUCCIÓN</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"""
-        <div class="summary-card">
-            <div class="summary-number">{total_produccion_esperada:,}</div>
-            <div class="summary-label">🥚 PRODUCCIÓN ESPERADA (90%)</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        capacidad = (total_gallinas_generales / 100000) * 100 if total_gallinas_generales > 0 else 0
-        st.markdown(f"""
-        <div class="summary-card">
-            <div class="summary-number">{round(capacidad, 1)}%</div>
-            <div class="summary-label">📊 OCUPACIÓN DE CAPACIDAD</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
+    # Inicializar estado - por defecto NINGÚN botón seleccionado
+    if 'prod_submenu' not in st.session_state:
+        st.session_state.prod_submenu = None
     
     # ========== BOTONES HORIZONTALES ==========
-    # Inicializar estado del botón seleccionado
-    if 'prod_submenu' not in st.session_state:
-        st.session_state.prod_submenu = "registrar"
-    
-    # Crear 3 columnas para los botones (mismo ancho)
     col_b1, col_b2, col_b3 = st.columns(3)
     
     with col_b1:
@@ -555,6 +466,7 @@ elif menu == "🐔 Producción":
     st.markdown("---")
     
     # ========== CONTENIDO SEGÚN BOTÓN SELECCIONADO ==========
+    # Si no hay ningún botón seleccionado, no mostrar nada (solo los botones)
     
     # Opción 1: REGISTRAR PRODUCCIÓN
     if st.session_state.prod_submenu == "registrar":
@@ -629,21 +541,67 @@ elif menu == "🐔 Producción":
     
     # Opción 2: INVENTARIO DE GALLINAS
     elif st.session_state.prod_submenu == "inventario":
-        st.subheader("🐔 Estado actual de galpones")
+        st.markdown("### 📊 Resumen de Inventario de Gallinas")
         
-        datos_galpones = []
-        for g in galpones:
-            cantidad_actual = inventario_gallinas.get(str(g["id"]), {}).get("cantidad", 0)
-            postura_real = obtener_postura_real(g["id"])
-            datos_galpones.append({
-                "Galpón": g["nombre"],
-                "Gallinas actuales": f"{cantidad_actual:,}",
-                "Estado": g["estado"],
+        datos_resumen = []
+        total_gallinas_generales = 0
+        total_produccion_esperada = 0
+        
+        for galpon in galpones:
+            galpon_id = galpon["id"]
+            cantidad = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
+            total_gallinas_generales += cantidad
+            
+            produccion_esperada = int(cantidad * 0.9)
+            total_produccion_esperada += produccion_esperada
+            
+            mortalidad_mes = obtener_mortalidad_mes(galpon_id)
+            postura_real = obtener_postura_real(galpon_id)
+            
+            estado_color = {
+                "produccion": "🟢",
+                "mantenimiento": "🟡",
+                "descanso": "🔵",
+                "descarte": "🔴"
+            }.get(galpon["estado"], "⚪")
+            
+            datos_resumen.append({
+                "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
+                "Galpón": galpon["nombre"],
+                "Gallinas actuales": f"{cantidad:,}",
+                "Prod. esperada (90%)": f"{produccion_esperada:,}",
+                "Mortalidad (mes)": f"{mortalidad_mes:,}",
                 "Postura real": f"{postura_real}%",
-                "Capacidad máxima": "100,000" if "Levante" not in g["nombre"] else "50,000"
+                "Indicador": "🟢 Normal" if postura_real >= 85 else "🟡 Atención" if postura_real >= 70 else "🔴 Crítico"
             })
         
-        st.dataframe(pd.DataFrame(datos_galpones), use_container_width=True, hide_index=True)
+        df_resumen = pd.DataFrame(datos_resumen)
+        st.dataframe(df_resumen, use_container_width=True, hide_index=True)
+        
+        # Tarjetas de resumen
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"""
+            <div class="summary-card">
+                <div class="summary-number">{total_gallinas_generales:,}</div>
+                <div class="summary-label">🐔 TOTAL GALLINAS EN PRODUCCIÓN</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+            <div class="summary-card">
+                <div class="summary-number">{total_produccion_esperada:,}</div>
+                <div class="summary-label">🥚 PRODUCCIÓN ESPERADA (90%)</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col3:
+            capacidad = (total_gallinas_generales / 100000) * 100 if total_gallinas_generales > 0 else 0
+            st.markdown(f"""
+            <div class="summary-card">
+                <div class="summary-number">{round(capacidad, 1)}%</div>
+                <div class="summary-label">📊 OCUPACIÓN DE CAPACIDAD</div>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.write("---")
         st.subheader("📝 Registrar movimiento de gallinas")
@@ -739,7 +697,6 @@ elif menu == "🐔 Producción":
                 df_mostrar.columns = ["Fecha", " ", "Galpón", "Cantidad", "Motivo", "Anterior", "Nueva"]
                 st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
                 
-                # Resumen estadístico
                 st.write("---")
                 st.subheader("📊 Resumen de movimientos")
                 
@@ -755,6 +712,10 @@ elif menu == "🐔 Producción":
                 st.info("No hay movimientos con los filtros seleccionados.")
         else:
             st.info("No hay movimientos registrados aún. Usa 'Inventario Gallinas' para registrar ingresos o mortalidad.")
+    
+    # Si no hay botón seleccionado, no mostrar nada adicional (solo los botones)
+    elif st.session_state.prod_submenu is None:
+        st.info("👈 Selecciona una opción para comenzar")
 
 # ============================================
 # MÓDULO: INVENTARIO HUEVOS
