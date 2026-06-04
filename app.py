@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión 2.0 - Con Diseño Personalizado
+# Versión 2.0 - Con Logo Real
 # ============================================
 
 import streamlit as st
@@ -9,7 +9,7 @@ from datetime import datetime
 import hashlib
 import json
 import os
-import base64
+from PIL import Image
 
 # ============================================
 # CONFIGURACIÓN DE PÁGINA
@@ -58,11 +58,17 @@ st.markdown("""
         font-weight: bold;
     }
     
-    /* Huevo decorativo */
-    .egg-image {
+    /* Logo imagen */
+    .logo-container {
         text-align: center;
-        font-size: 120px;
-        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        margin-bottom: 20px;
+    }
+    
+    .logo-img {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     }
     
     /* Botón personalizado */
@@ -89,11 +95,6 @@ st.markdown("""
         font-size: 14px;
     }
     
-    /* Ocultar el menú lateral en login */
-    .css-1d391kg {
-        display: none;
-    }
-    
     /* Sidebar con colores Doña Dora */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);
@@ -110,10 +111,15 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
-    .egg-icon {
-        font-size: 40px;
+    .sidebar-logo {
         text-align: center;
-        display: block;
+        margin-bottom: 20px;
+    }
+    
+    .sidebar-logo-img {
+        max-width: 80px;
+        border-radius: 50%;
+        border: 2px solid #FFD600;
     }
     
     /* Métricas */
@@ -122,6 +128,22 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# ============================================
+# FUNCIÓN PARA CARGAR EL LOGO
+# ============================================
+
+def cargar_logo():
+    """Carga el logo de Doña Dora desde el repositorio"""
+    logo_path = "logo.jpeg"  # <--- ESTA ES LA LÍNEA CORREGIDA
+    if os.path.exists(logo_path):
+        return Image.open(logo_path)
+    else:
+        # Intentar con jpg si no existe jpeg
+        logo_path_jpg = "logo.jpg"
+        if os.path.exists(logo_path_jpg):
+            return Image.open(logo_path_jpg)
+    return None
 
 # ============================================
 # CONFIGURACIÓN INICIAL
@@ -218,7 +240,7 @@ def eliminar_categoria(categoria):
     return False
 
 # ============================================
-# INTERFAZ DE LOGIN (REDISEÑADA)
+# INTERFAZ DE LOGIN (CON LOGO REAL)
 # ============================================
 
 if 'logged_in' not in st.session_state:
@@ -232,8 +254,15 @@ if not st.session_state.logged_in:
     with col2:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         
-        # Logo y título
-        st.markdown('<div class="egg-image">🥚</div>', unsafe_allow_html=True)
+        # Logo real de Doña Dora
+        logo = cargar_logo()
+        if logo:
+            st.image(logo, width=150, use_container_width=False)
+        else:
+            # Si no encuentra la imagen, muestra un emoji
+            st.markdown('<div class="logo-container"><span style="font-size: 100px;">🥚</span></div>', unsafe_allow_html=True)
+            st.info("💡 Sube el archivo 'logo.jpeg' o 'logo.jpg' a este repositorio para ver el logo real")
+        
         st.markdown('<h1 class="dora-title">HUEVOS DOÑA DORA</h1>', unsafe_allow_html=True)
         st.markdown('<p class="dora-subtitle">Sistema de Gestión Avícola</p>', unsafe_allow_html=True)
         
@@ -271,7 +300,13 @@ if not st.session_state.logged_in:
 usuario_actual = st.session_state.usuario
 rol_actual = st.session_state.rol
 
-st.sidebar.markdown('<p class="egg-icon">🥚</p>', unsafe_allow_html=True)
+# Logo en la sidebar
+logo = cargar_logo()
+if logo:
+    st.sidebar.image(logo, width=80)
+else:
+    st.sidebar.markdown('<p class="egg-icon">🥚</p>', unsafe_allow_html=True)
+
 st.sidebar.markdown('<p class="sidebar-title">HUEVOS DOÑA DORA</p>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
 
