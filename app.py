@@ -750,4 +750,184 @@ elif menu == "📦 Inventario Huevos":
             porcentaje = (cantidad / total * 100) if total > 0 else 0
             datos_inventario.append({
                 "Categoría": cat,
-                "Cantidad": f
+                "Cantidad": f"{cantidad:,}",
+                "Porcentaje": f"{porcentaje:.1f}%"
+            })
+    
+    if datos_inventario:
+        st.dataframe(pd.DataFrame(datos_inventario), use_container_width=True, hide_index=True)
+    else:
+        st.info("No hay inventario registrado aún")
+
+# ============================================
+# MÓDULO: CATEGORÍAS
+# ============================================
+elif menu == "🏷️ Categorías":
+    st.title("🏷️ Gestión de Categorías de Huevos")
+    
+    st.write("### Categorías actuales")
+    for cat in categorias_data["categorias"]:
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"- **{cat}**")
+        with col2:
+            if cat not in ["Extra", "AAA", "AA", "A", "B"]:
+                if st.button(f"🗑️ Eliminar {cat}", key=f"del_{cat}"):
+                    if eliminar_categoria(cat):
+                        st.success(f"✅ Categoría '{cat}' eliminada")
+                        st.rerun()
+                    else:
+                        st.warning(f"⚠️ No se puede eliminar: tiene stock o es estándar")
+    
+    st.write("---")
+    st.write("### Agregar nueva categoría")
+    nueva_cat = st.text_input("Nombre de la nueva categoría (ej: Jumbo, C, Sucio)")
+    if st.button("➕ Agregar categoría"):
+        if agregar_categoria(nueva_cat.upper()):
+            st.success(f"✅ Categoría '{nueva_cat.upper()}' agregada")
+            st.rerun()
+        else:
+            st.error("❌ La categoría ya existe o está vacía")
+    
+    st.info("💡 **Nota:** Las categorías Extra, AAA, AA, A, B son estándar y no se pueden eliminar")
+
+# ============================================
+# MÓDULO: REPORTES
+# ============================================
+elif menu == "📊 Reportes":
+    st.title("📊 Reportes de Producción")
+    
+    if produccion:
+        df = pd.DataFrame(produccion)
+        df["fecha"] = pd.to_datetime(df["fecha"])
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            fecha_inicio = st.date_input("Desde", df["fecha"].min().date())
+        with col2:
+            fecha_fin = st.date_input("Hasta", df["fecha"].max().date())
+        
+        mask = (df["fecha"].dt.date >= fecha_inicio) & (df["fecha"].dt.date <= fecha_fin)
+        df_filtrado = df[mask]
+        
+        if not df_filtrado.empty:
+            total_periodo = df_filtrado["total_huevos"].sum()
+            st.metric("Total producido en el período", f"{total_periodo:,} huevos")
+            
+            st.write("---")
+            st.subheader("Producción por galpón")
+            por_galpon = df_filtrado.groupby("galpon_id")["total_huevos"].sum().reset_index()
+            for _, row in por_galpon.iterrows():
+                galpon = next((g["nombre"] for g in galpones if g["id"] == row["galpon_id"]), "?")
+                st.write(f"**{galpon}**: {row['total_huevos']:,} huevos")
+            
+            st.write("---")
+            st.subheader("Detalle de registros")
+            df_mostrar = df_filtrado[["fecha", "galpon_id", "total_huevos"]].copy()
+            df_mostrar["galpon"] = df_mostrar["galpon_id"].apply(
+                lambda x: next((g["nombre"] for g in galpones if g["id"] == x), "?")
+            )
+            df_mostrar = df_mostrar.rename(columns={"fecha": "Fecha", "total_huevos": "Total Huevos"})
+            st.dataframe(df_mostrar[["Fecha", "galpon", "Total Huevos"]], use_container_width=True, hide_index=True)
+        else:
+            st.info("No hay datos en el período seleccionado")
+    else:
+        st.info("No hay registros de producción aún")
+
+# ============================================
+# MÓDULO: USUARIOS
+# ============================================
+elif menu == "👥 Usuarios":
+    st.title("👥 Gestión de Usuarios")
+    
+    st.write("### Usuarios actuales")
+    for user, info in usuarios.items():
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.write(f"**{user}** - {info['nombre']} ({info['rol']})")
+        with col2:
+            if user != "admin":
+                if st.button(f"🗑️ Eliminar {user}", key=f"del_user_{user}"):
+                    del usuarios[user]
+                    guardar_datos(USUARIOS_FILE, usuarios)
+                    st.success(f"✅ Usuario '{user}' eliminado")
+                    st.rerun()
+    
+    st.write("---")
+    st.write("### Agregar nuevo usuario")
+    with st.form("nuevo_usuario"):
+        nuevo_user = st.text_input("Usuario")
+        nuevo_nombre = st.text_input("Nombre completo")
+        nuevo_pass = st.text_input("Contraseña", type="password")
+        nuevo_rol = st.selectbox("Rol", ["produccion", "contador", "vendedor", "admin"])
+        
+        if st.form_submit_button("➕ Crear usuario"):
+            if nuevo_user and nuevo_nombre and nuevo_pass:
+                if nuevo_user not in usuarios:
+                    usuarios[nuevo_user] = {
+                        "password": hash_password(nuevo_pass),
+                        "nombre": nuevo_nombre,
+                        "rol": nuevo_rol
+                    }
+                    guardar_datos(USUARIOS_FILE, usuarios)
+                    st.success(f"✅ Usuario '{nuevo_user}' creado")
+                    st.rerun()
+                else:
+                    st.error("❌ El usuario ya existe")
+            else:
+                st.error("❌ Complete todos los campos")
+
+# ============================================
+# MÓDULO: CONFIGURACIÓN
+# ============================================
+elif menu == "⚙️ Configuración":
+    st.title("⚙️ Configuración de Galpones")
+    
+    st.write("### Galpones registrados")
+    for i, galpon in enumerate(galpones):
+        with st.expander(f"📌 {galpon['nombre']}"):
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                nuevo_nombre = st.text_input("Nombre", value=galpon['nombre'], key=f"nombre_{i}")
+            with col2:
+                nueva_cantidad = st.number_input("Cantidad de gallinas", value=galpon['cantidad_gallinas'], key=f"cantidad_{i}")
+            with col3:
+                nuevo_estado = st.selectbox("Estado", ["produccion", "mantenimiento", "descanso", "descarte"], 
+                                           index=["produccion", "mantenimiento", "descanso", "descarte"].index(galpon['estado']),
+                                           key=f"estado_{i}")
+            
+            if st.button(f"💾 Guardar cambios", key=f"guardar_{i}"):
+                galpones[i]["nombre"] = nuevo_nombre
+                galpones[i]["cantidad_gallinas"] = nueva_cantidad
+                galpones[i]["estado"] = nuevo_estado
+                guardar_datos(GALPONES_FILE, galpones)
+                st.success(f"✅ Galpón actualizado")
+                st.rerun()
+    
+    st.write("---")
+    st.write("### Agregar nuevo galpón")
+    with st.form("nuevo_galpon"):
+        nombre_galpon = st.text_input("Nombre del galpón")
+        gallinas_galpon = st.number_input("Cantidad de gallinas", min_value=0, value=0)
+        estado_galpon = st.selectbox("Estado", ["produccion", "mantenimiento", "descanso", "descarte"])
+        
+        if st.form_submit_button("➕ Agregar galpón"):
+            if nombre_galpon:
+                nuevo_id = max([g["id"] for g in galpones]) + 1 if galpones else 1
+                galpones.append({
+                    "id": nuevo_id,
+                    "nombre": nombre_galpon,
+                    "cantidad_gallinas": gallinas_galpon,
+                    "estado": estado_galpon
+                })
+                guardar_datos(GALPONES_FILE, galpones)
+                inventario_gallinas[str(nuevo_id)] = {
+                    "nombre": nombre_galpon,
+                    "cantidad": gallinas_galpon,
+                    "estado": estado_galpon
+                }
+                guardar_datos(INVENTARIO_GALLINAS_FILE, inventario_gallinas)
+                st.success(f"✅ Galpón '{nombre_galpon}' agregado")
+                st.rerun()
+            else:
+                st.error("❌ El nombre es obligatorio")
