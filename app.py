@@ -1,6 +1,6 @@
 # ============================================
-# ERP AVICOLA - PRODUCCIÓN DE HUEVOS
-# Versión 1.0 - Con Login y Módulo de Producción
+# ERP AVICOLA - HUEVOS DOÑA DORA
+# Versión 2.0 - Con Diseño Personalizado
 # ============================================
 
 import streamlit as st
@@ -9,21 +9,129 @@ from datetime import datetime
 import hashlib
 import json
 import os
+import base64
+
+# ============================================
+# CONFIGURACIÓN DE PÁGINA
+# ============================================
+
+st.set_page_config(
+    page_title="Doña Dora - ERP", 
+    page_icon="🥚", 
+    layout="wide"
+)
+
+# ============================================
+# CSS PERSONALIZADO (Colores Verde y Amarillo)
+# ============================================
+
+st.markdown("""
+<style>
+    /* Fondo general con tonos Doña Dora */
+    .stApp {
+        background: linear-gradient(135deg, #E8F5E9 0%, #FFF9C4 100%);
+    }
+    
+    /* Tarjeta de login */
+    .login-card {
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 2px solid #FFD600;
+    }
+    
+    /* Título principal */
+    .dora-title {
+        text-align: center;
+        color: #2E7D32;
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .dora-subtitle {
+        text-align: center;
+        color: #F9A825;
+        font-size: 1rem;
+        margin-bottom: 30px;
+        font-weight: bold;
+    }
+    
+    /* Huevo decorativo */
+    .egg-image {
+        text-align: center;
+        font-size: 120px;
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+    }
+    
+    /* Botón personalizado */
+    .stButton > button {
+        background-color: #2E7D32;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 30px;
+        font-weight: bold;
+        border: none;
+        width: 100%;
+    }
+    
+    .stButton > button:hover {
+        background-color: #F9A825;
+        color: #2E7D32;
+    }
+    
+    /* Inputs más pequeños */
+    .stTextInput > div > div > input {
+        border-radius: 25px;
+        border: 2px solid #FFD600;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+    
+    /* Ocultar el menú lateral en login */
+    .css-1d391kg {
+        display: none;
+    }
+    
+    /* Sidebar con colores Doña Dora */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    
+    .sidebar-title {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        color: #FFD600 !important;
+    }
+    
+    .egg-icon {
+        font-size: 40px;
+        text-align: center;
+        display: block;
+    }
+    
+    /* Métricas */
+    [data-testid="stMetricValue"] {
+        color: #2E7D32;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # ============================================
 # CONFIGURACIÓN INICIAL
 # ============================================
 
-# Archivos para guardar datos
 USUARIOS_FILE = 'usuarios.json'
 GALPONES_FILE = 'galpones.json'
 PRODUCCION_FILE = 'produccion.json'
 INVENTARIO_FILE = 'inventario.json'
 CATEGORIAS_FILE = 'categorias.json'
-
-# ============================================
-# FUNCIONES PARA CARGAR/GUARDAR DATOS
-# ============================================
 
 def cargar_datos(archivo, por_defecto):
     if os.path.exists(archivo):
@@ -38,11 +146,7 @@ def guardar_datos(archivo, datos):
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# ============================================
-# DATOS POR DEFECTO
-# ============================================
-
-# Usuarios: admin / admin123
+# Datos por defecto
 USUARIOS_POR_DEFECTO = {
     "admin": {
         "password": hash_password("admin123"),
@@ -56,7 +160,6 @@ USUARIOS_POR_DEFECTO = {
     }
 }
 
-# Galpones por defecto
 GALPONES_POR_DEFECTO = [
     {"id": 1, "nombre": "Galpón 1", "cantidad_gallinas": 75000, "estado": "produccion"},
     {"id": 2, "nombre": "Galpón 2", "cantidad_gallinas": 0, "estado": "mantenimiento"},
@@ -64,15 +167,10 @@ GALPONES_POR_DEFECTO = [
     {"id": 4, "nombre": "Galpón Levante", "cantidad_gallinas": 0, "estado": "descanso"}
 ]
 
-# Categorías de huevos por defecto
 CATEGORIAS_POR_DEFECTO = {
     "categorias": ["Extra", "AAA", "AA", "A", "B"],
     "editable": True
 }
-
-# ============================================
-# INICIALIZAR DATOS
-# ============================================
 
 usuarios = cargar_datos(USUARIOS_FILE, USUARIOS_POR_DEFECTO)
 galpones = cargar_datos(GALPONES_FILE, GALPONES_POR_DEFECTO)
@@ -84,10 +182,6 @@ if not inventario:
     for cat in categorias_data["categorias"]:
         inventario[f"Bodega1_{cat}"] = 0
     inventario["Bodega1_total"] = 0
-
-# ============================================
-# FUNCIONES DEL NEGOCIO
-# ============================================
 
 def registrar_produccion(galpon_id, fecha, clasificacion):
     nuevo_registro = {
@@ -124,46 +218,63 @@ def eliminar_categoria(categoria):
     return False
 
 # ============================================
-# INTERFAZ DE LOGIN
+# INTERFAZ DE LOGIN (REDISEÑADA)
 # ============================================
-
-st.set_page_config(page_title="ERP Avícola", page_icon="🐔", layout="wide")
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.usuario = None
 
 if not st.session_state.logged_in:
-    st.title("🐔 ERP Avícola - Inicio de Sesión")
-    st.write("---")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        usuario = st.text_input("Usuario")
-        password = st.text_input("Contraseña", type="password")
-        
-        if st.button("Ingresar", type="primary"):
-            if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
-                st.session_state.logged_in = True
-                st.session_state.usuario = usuario
-                st.session_state.rol = usuarios[usuario]["rol"]
-                st.rerun()
-            else:
-                st.error("❌ Usuario o contraseña incorrectos")
+    # Contenedor principal centrado
+    col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        st.info("📝 **Credenciales de prueba:**\n\n- Usuario: `admin`\n- Contraseña: `admin123`\n\n- Usuario: `auxiliar`\n- Contraseña: `produccion123`")
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        
+        # Logo y título
+        st.markdown('<div class="egg-image">🥚</div>', unsafe_allow_html=True)
+        st.markdown('<h1 class="dora-title">HUEVOS DOÑA DORA</h1>', unsafe_allow_html=True)
+        st.markdown('<p class="dora-subtitle">Sistema de Gestión Avícola</p>', unsafe_allow_html=True)
+        
+        # Campos de login (más pequeños)
+        with st.container():
+            usuario = st.text_input("👤 USUARIO", key="login_user", placeholder="Ingrese su usuario")
+            password = st.text_input("🔒 CONTRASEÑA", type="password", key="login_pass", placeholder="Ingrese su contraseña")
+            
+            col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+            with col_btn2:
+                if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
+                    if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
+                        st.session_state.logged_in = True
+                        st.session_state.usuario = usuario
+                        st.session_state.rol = usuarios[usuario]["rol"]
+                        st.rerun()
+                    else:
+                        st.error("❌ Usuario o contraseña incorrectos")
+        
+        # Credenciales de prueba
+        with st.expander("📋 Credenciales de prueba"):
+            st.markdown("""
+            - **Administrador:** `admin` / `admin123`
+            - **Auxiliar:** `auxiliar` / `produccion123`
+            """)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
     st.stop()
 
 # ============================================
-# MENÚ PRINCIPAL
+# MENÚ PRINCIPAL (después del login)
 # ============================================
 
 usuario_actual = st.session_state.usuario
 rol_actual = st.session_state.rol
 
-st.sidebar.title(f"🐔 ERP Avícola")
+st.sidebar.markdown('<p class="egg-icon">🥚</p>', unsafe_allow_html=True)
+st.sidebar.markdown('<p class="sidebar-title">HUEVOS DOÑA DORA</p>', unsafe_allow_html=True)
+st.sidebar.markdown("---")
+
 st.sidebar.write(f"**Usuario:** {usuario_actual}")
 st.sidebar.write(f"**Rol:** {rol_actual}")
 st.sidebar.write("---")
