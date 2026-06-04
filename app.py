@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión 2.6 - Dashboard completo en Inventario Gallinas
+# Versión 3.0 - Dashboard siempre visible + botones
 # ============================================
 
 import streamlit as st
@@ -443,42 +443,107 @@ if menu == "🏠 Dashboard":
         st.info("No hay registros de producción aún.")
 
 # ============================================
-# MÓDULO: PRODUCCIÓN (BOTONES ARRIBA)
+# MÓDULO: PRODUCCIÓN (DASHBOARD SIEMPRE VISIBLE + BOTONES)
 # ============================================
 elif menu == "🐔 Producción":
     st.title("🐔 Gestión de Producción")
-    
-    # Inicializar estado - por defecto NINGÚN botón seleccionado
-    if 'prod_submenu' not in st.session_state:
-        st.session_state.prod_submenu = None
     
     # ========== BOTONES HORIZONTALES ==========
     col_b1, col_b2, col_b3 = st.columns(3)
     
     with col_b1:
-        if st.button("📝 Registrar Producción", key="btn_registrar", use_container_width=True):
-            st.session_state.prod_submenu = "registrar"
-    
+        ver_registro = st.button("📝 Registrar Producción", key="btn_registrar", use_container_width=True)
     with col_b2:
-        if st.button("🐔 Inventario Gallinas", key="btn_inventario", use_container_width=True):
-            st.session_state.prod_submenu = "inventario"
-    
+        ver_inventario = st.button("🐔 Inventario Gallinas", key="btn_inventario", use_container_width=True)
     with col_b3:
-        if st.button("📜 Historial Gallinas", key="btn_historial", use_container_width=True):
-            st.session_state.prod_submenu = "historial"
+        ver_historial = st.button("📜 Historial Gallinas", key="btn_historial", use_container_width=True)
     
     st.markdown("---")
     
-    # ========== CONTENIDO SEGÚN BOTÓN SELECCIONADO ==========
+    # ========== DASHBOARD DE GALLINAS (SIEMPRE VISIBLE) ==========
+    st.markdown("### 📊 Resumen de Inventario de Gallinas")
     
-    # Opción 1: REGISTRAR PRODUCCIÓN
-    if st.session_state.prod_submenu == "registrar":
+    # Preparar datos para la tabla
+    datos_resumen = []
+    total_gallinas_generales = 0
+    total_produccion_esperada = 0
+    
+    for galpon in galpones:
+        galpon_id = galpon["id"]
+        cantidad = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
+        total_gallinas_generales += cantidad
+        
+        produccion_esperada = int(cantidad * 0.9)
+        total_produccion_esperada += produccion_esperada
+        
+        mortalidad_mes = obtener_mortalidad_mes(galpon_id)
+        postura_real = obtener_postura_real(galpon_id)
+        
+        estado_color = {
+            "produccion": "🟢",
+            "mantenimiento": "🟡",
+            "descanso": "🔵",
+            "descarte": "🔴"
+        }.get(galpon["estado"], "⚪")
+        
+        if postura_real >= 85:
+            indicador = "🟢 Normal"
+        elif postura_real >= 70:
+            indicador = "🟡 Atención"
+        else:
+            indicador = "🔴 Crítico"
+        
+        datos_resumen.append({
+            "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
+            "Galpón": galpon["nombre"],
+            "Gallinas actuales": f"{cantidad:,}",
+            "Prod. esperada (90%)": f"{produccion_esperada:,}",
+            "Mortalidad (mes)": f"{mortalidad_mes:,}",
+            "Postura real": f"{postura_real}%",
+            "Indicador": indicador
+        })
+    
+    df_resumen = pd.DataFrame(datos_resumen)
+    st.dataframe(df_resumen, use_container_width=True, hide_index=True)
+    
+    # Tarjetas de resumen
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(f"""
+        <div class="summary-card">
+            <div class="summary-number">{total_gallinas_generales:,}</div>
+            <div class="summary-label">🐔 TOTAL GALLINAS EN PRODUCCIÓN</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"""
+        <div class="summary-card">
+            <div class="summary-number">{total_produccion_esperada:,}</div>
+            <div class="summary-label">🥚 PRODUCCIÓN ESPERADA (90%)</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        capacidad = (total_gallinas_generales / 100000) * 100 if total_gallinas_generales > 0 else 0
+        st.markdown(f"""
+        <div class="summary-card">
+            <div class="summary-number">{round(capacidad, 1)}%</div>
+            <div class="summary-label">📊 OCUPACIÓN DE CAPACIDAD</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # ========== CONTENIDO EXTRA SEGÚN BOTÓN PRESIONADO ==========
+    
+    # Opción 1: Registrar Producción
+    if ver_registro:
+        st.subheader("📝 Registrar Producción Diaria")
         col1, col2 = st.columns(2)
         
         with col1:
             galpones_activos = [g for g in galpones if g["estado"] == "produccion" and g["cantidad_gallinas"] > 0]
             if not galpones_activos:
-                st.warning("⚠️ No hay galpones activos con gallinas. Registra ingreso de levante en 'Inventario Gallinas'.")
+                st.warning("⚠️ No hay galpones activos con gallinas.")
             else:
                 galpon_seleccionado = st.selectbox(
                     "Seleccione el galpón",
@@ -488,10 +553,6 @@ elif menu == "🐔 Producción":
                 )
                 
                 fecha = st.date_input("Fecha de producción", datetime.now())
-                
-                gallinas_galpon = galpon_seleccionado["cantidad_gallinas"]
-                produccion_esperada = int(gallinas_galpon * 0.9)
-                st.info(f"📊 Producción esperada (90%): {produccion_esperada:,} huevos")
                 
                 st.write("---")
                 st.subheader("Clasificación de huevos")
@@ -505,10 +566,7 @@ elif menu == "🐔 Producción":
                 total_ingresado = sum(clasificacion.values())
                 st.info(f"📊 Total de huevos a registrar: {total_ingresado:,}")
                 
-                if total_ingresado > produccion_esperada * 1.1:
-                    st.warning("⚠️ La producción ingresada es mayor al 110% de lo esperado. Verifica los números.")
-                
-                if st.button("✅ Registrar Producción", type="primary"):
+                if st.button("✅ Registrar Producción", type="primary", key="registrar_prod"):
                     if total_ingresado > 0:
                         clasificacion_filtrada = {k: v for k, v in clasificacion.items() if v > 0}
                         registrar_produccion(
@@ -527,97 +585,12 @@ elif menu == "🐔 Producción":
             1. Selecciona el **galpón** que terminó de recolectar
             2. Ingresa la **fecha** (hoy por defecto)
             3. Anota los números que salen en la **clasificadora**
-            4. Completa cada categoría (Extra, AAA, etc.)
+            4. Completa cada categoría
             5. Presiona **Registrar Producción**
-            
-            > ℹ️ El sistema sumará automáticamente al inventario de **Bodega 1**
             """)
-            
-            st.write("---")
-            st.subheader("📈 Producción de Hoy")
-            hoy = datetime.now().strftime("%Y-%m-%d")
-            produccion_hoy = [p for p in produccion if p["fecha"] == hoy]
-            if produccion_hoy:
-                for p in produccion_hoy:
-                    galpon = next((g["nombre"] for g in galpones if g["id"] == p["galpon_id"]), "?")
-                    st.write(f"**{galpon}**: {p['total_huevos']:,} huevos")
     
-    # Opción 2: INVENTARIO DE GALLINAS (DASHBOARD COMPLETO)
-    elif st.session_state.prod_submenu == "inventario":
-        # Título del dashboard
-        st.markdown("### 📊 Resumen de Inventario de Gallinas")
-        
-        # Preparar datos para la tabla
-        datos_resumen = []
-        total_gallinas_generales = 0
-        total_produccion_esperada = 0
-        
-        for galpon in galpones:
-            galpon_id = galpon["id"]
-            cantidad = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
-            total_gallinas_generales += cantidad
-            
-            produccion_esperada = int(cantidad * 0.9)
-            total_produccion_esperada += produccion_esperada
-            
-            mortalidad_mes = obtener_mortalidad_mes(galpon_id)
-            postura_real = obtener_postura_real(galpon_id)
-            
-            estado_color = {
-                "produccion": "🟢",
-                "mantenimiento": "🟡",
-                "descanso": "🔵",
-                "descarte": "🔴"
-            }.get(galpon["estado"], "⚪")
-            
-            # Indicador de alerta según postura
-            if postura_real >= 85:
-                indicador = "🟢 Normal"
-            elif postura_real >= 70:
-                indicador = "🟡 Atención"
-            else:
-                indicador = "🔴 Crítico"
-            
-            datos_resumen.append({
-                "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
-                "Galpón": galpon["nombre"],
-                "Gallinas actuales": f"{cantidad:,}",
-                "Prod. esperada (90%)": f"{produccion_esperada:,}",
-                "Mortalidad (mes)": f"{mortalidad_mes:,}",
-                "Postura real": f"{postura_real}%",
-                "Indicador": indicador
-            })
-        
-        # Mostrar tabla
-        df_resumen = pd.DataFrame(datos_resumen)
-        st.dataframe(df_resumen, use_container_width=True, hide_index=True)
-        
-        # Tarjetas de resumen
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown(f"""
-            <div class="summary-card">
-                <div class="summary-number">{total_gallinas_generales:,}</div>
-                <div class="summary-label">🐔 TOTAL GALLINAS EN PRODUCCIÓN</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"""
-            <div class="summary-card">
-                <div class="summary-number">{total_produccion_esperada:,}</div>
-                <div class="summary-label">🥚 PRODUCCIÓN ESPERADA (90%)</div>
-            </div>
-            """, unsafe_allow_html=True)
-        with col3:
-            capacidad = (total_gallinas_generales / 100000) * 100 if total_gallinas_generales > 0 else 0
-            st.markdown(f"""
-            <div class="summary-card">
-                <div class="summary-number">{round(capacidad, 1)}%</div>
-                <div class="summary-label">📊 OCUPACIÓN DE CAPACIDAD</div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.write("---")
+    # Opción 2: Inventario Gallinas (formulario de movimientos)
+    elif ver_inventario:
         st.subheader("📝 Registrar movimiento de gallinas")
         
         col1, col2 = st.columns(2)
@@ -683,8 +656,8 @@ elif menu == "🐔 Producción":
                 else:
                     st.error(f"❌ {resultado}")
     
-    # Opción 3: HISTORIAL DE GALLINAS
-    elif st.session_state.prod_submenu == "historial":
+    # Opción 3: Historial Gallinas
+    elif ver_historial:
         st.subheader("📜 Historial de movimientos de gallinas")
         
         if movimientos_gallinas:
@@ -725,11 +698,11 @@ elif menu == "🐔 Producción":
             else:
                 st.info("No hay movimientos con los filtros seleccionados.")
         else:
-            st.info("No hay movimientos registrados aún. Usa 'Inventario Gallinas' para registrar ingresos o mortalidad.")
+            st.info("No hay movimientos registrados aún.")
     
-    # Si no hay botón seleccionado, mensaje de bienvenida
-    elif st.session_state.prod_submenu is None:
-        st.info("👈 Selecciona una opción para comenzar")
+    # Si no se ha presionado ningún botón, mostrar mensaje
+    else:
+        st.info("👈 Presiona un botón para realizar una acción específica (Registrar Producción, Inventario Gallinas o Historial Gallinas)")
 
 # ============================================
 # MÓDULO: INVENTARIO HUEVOS
