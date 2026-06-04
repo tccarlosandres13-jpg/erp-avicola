@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión 3.4 - Filtro de fecha vertical compacto
+# Versión 3.5 - Login proporcionado + Fecha vertical en Producción
 # ============================================
 
 import streamlit as st
@@ -13,19 +13,25 @@ from PIL import Image
 
 st.set_page_config(page_title="Doña Dora - ERP", page_icon="🥚", layout="wide")
 
-# CSS con ancho forzado de 130px
+# ============================================
+# CSS PERSONALIZADO
+# ============================================
+
 st.markdown("""
 <style>
     .stApp {
         background: linear-gradient(135deg, #E8F5E9 0%, #FFF9C4 100%);
     }
     
+    /* TARJETA DE LOGIN MEJORADA */
     .login-card {
         background-color: rgba(255, 255, 255, 0.95);
         border-radius: 20px;
-        padding: 30px;
+        padding: 40px 30px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         border: 2px solid #FFD600;
+        max-width: 450px;
+        margin: 0 auto;
     }
     
     .dora-title {
@@ -44,6 +50,7 @@ st.markdown("""
         font-weight: bold;
     }
     
+    /* BOTONES */
     .stButton > button {
         background-color: #2E7D32;
         color: white;
@@ -59,10 +66,20 @@ st.markdown("""
         color: #2E7D32;
     }
     
+    /* INPUTS DE LOGIN MÁS PROPORCIONADOS */
+    .stTextInput > div > div > input {
+        border-radius: 25px;
+        border: 2px solid #FFD600;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    
+    /* MÉTRICAS */
     [data-testid="stMetricValue"] {
         color: #2E7D32;
     }
     
+    /* TARJETAS DE RESUMEN */
     .summary-card {
         background-color: white;
         border-radius: 15px;
@@ -83,6 +100,7 @@ st.markdown("""
         color: #666;
     }
     
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);
     }
@@ -98,34 +116,39 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
-    /* FORZAR ancho compacto de los date inputs */
-    .stDateInput > div {
-        width: 130px !important;
-        min-width: 130px !important;
-        max-width: 130px !important;
-    }
-    
-    div[data-baseweb="input"] {
-        width: 130px !important;
-        min-width: 130px !important;
-        max-width: 130px !important;
-    }
-    
-    .stDateInput input {
-        width: 130px !important;
+    /* FECHAS VERTICALES EN PRODUCCIÓN */
+    .fecha-vertical {
+        background-color: white;
+        border-radius: 15px;
+        padding: 15px;
+        border: 1px solid #FFD600;
+        text-align: center;
     }
     
     .fecha-label {
         font-weight: bold;
         color: #2E7D32;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         font-size: 14px;
+    }
+    
+    /* Date inputs compactos */
+    .stDateInput > div {
+        width: 140px !important;
+    }
+    
+    div[data-baseweb="input"] {
+        width: 140px !important;
+    }
+    
+    .stDateInput input {
+        text-align: center;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# FUNCIONES (mantener todas las que tenías)
+# FUNCIONES
 # ============================================
 
 def cargar_logo():
@@ -212,7 +235,7 @@ if not inventario_huevos:
     guardar_datos(INVENTARIO_HUEVOS_FILE, inventario_huevos)
 
 # ============================================
-# FUNCIONES DE GALLINAS
+# FUNCIONES DE NEGOCIO
 # ============================================
 
 def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, fecha):
@@ -283,10 +306,6 @@ def obtener_mortalidad_periodo(galpon_id, fecha_inicio, fecha_fin):
                      and fecha_inicio <= m["fecha"] <= fecha_fin)
     return mortalidad
 
-# ============================================
-# FUNCIONES DE PRODUCCIÓN DE HUEVOS
-# ============================================
-
 def registrar_produccion(galpon_id, fecha, clasificacion):
     nuevo_registro = {
         "id": len(produccion) + 1,
@@ -322,7 +341,7 @@ def eliminar_categoria(categoria):
     return False
 
 # ============================================
-# LOGIN
+# LOGIN (PROPORCIONADO)
 # ============================================
 
 if 'logged_in' not in st.session_state:
@@ -335,25 +354,28 @@ if not st.session_state.logged_in:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         logo = cargar_logo()
         if logo:
-            st.image(logo, width=150)
+            st.image(logo, width=120, use_container_width=False)
         else:
-            st.markdown('<div style="text-align: center;"><span style="font-size: 100px;">🥚</span></div>', unsafe_allow_html=True)
+            st.markdown('<div style="text-align: center;"><span style="font-size: 80px;">🥚</span></div>', unsafe_allow_html=True)
         st.markdown('<h1 class="dora-title">HUEVOS DOÑA DORA</h1>', unsafe_allow_html=True)
         st.markdown('<p class="dora-subtitle">Sistema de Gestión Avícola</p>', unsafe_allow_html=True)
+        
         usuario = st.text_input("👤 USUARIO", key="login_user", placeholder="Ingrese su usuario")
         password = st.text_input("🔒 CONTRASEÑA", type="password", key="login_pass", placeholder="Ingrese su contraseña")
-        col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-        with col_btn2:
-            if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
-                if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
-                    st.session_state.logged_in = True
-                    st.session_state.usuario = usuario
-                    st.session_state.rol = usuarios[usuario]["rol"]
-                    st.rerun()
-                else:
-                    st.error("❌ Usuario o contraseña incorrectos")
+        
+        if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
+            if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
+                st.session_state.logged_in = True
+                st.session_state.usuario = usuario
+                st.session_state.rol = usuarios[usuario]["rol"]
+                st.rerun()
+            else:
+                st.error("❌ Usuario o contraseña incorrectos")
+        
         with st.expander("📋 Credenciales de prueba"):
-            st.markdown("- **Administrador:** `admin` / `admin123`\n- **Auxiliar:** `auxiliar` / `produccion123`")
+            st.markdown("- **Administrador:** `admin` / `admin123`")
+            st.markdown("- **Auxiliar:** `auxiliar` / `produccion123`")
+        
         st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
@@ -366,9 +388,9 @@ rol_actual = st.session_state.rol
 
 logo = cargar_logo()
 if logo:
-    st.sidebar.image(logo, width=80)
+    st.sidebar.image(logo, width=70)
 else:
-    st.sidebar.markdown('<p style="font-size: 40px; text-align: center;">🥚</p>', unsafe_allow_html=True)
+    st.sidebar.markdown('<p style="font-size: 36px; text-align: center;">🥚</p>', unsafe_allow_html=True)
 st.sidebar.markdown('<p class="sidebar-title">HUEVOS DOÑA DORA</p>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
 st.sidebar.write(f"**Usuario:** {usuario_actual}")
@@ -419,11 +441,12 @@ if menu == "🏠 Dashboard":
         st.info("No hay registros de producción aún.")
 
 # ============================================
-# PRODUCCIÓN (CON FILTRO VERTICAL COMPACTO)
+# PRODUCCIÓN (FECHAS VERTICALES)
 # ============================================
 elif menu == "🐔 Producción":
     st.title("🐔 Gestión de Producción")
     
+    # Botones horizontales
     col_b1, col_b2, col_b3 = st.columns(3)
     with col_b1:
         ver_registro = st.button("📝 Registrar Producción", key="btn_registrar", use_container_width=True)
@@ -435,7 +458,7 @@ elif menu == "🐔 Producción":
     st.markdown("---")
     st.markdown("### 📊 Resumen de Inventario de Gallinas")
     
-    # Filtro vertical compacto
+    # ========== FILTRO DE FECHA VERTICAL ==========
     fecha_fin_default = datetime.now()
     fecha_inicio_default = fecha_fin_default - timedelta(days=30)
     
@@ -444,18 +467,22 @@ elif menu == "🐔 Producción":
     if 'fecha_fin' not in st.session_state:
         st.session_state.fecha_fin = fecha_fin_default
     
-    # Usar columnas muy pequeñas para que los inputs sean compactos
-    col_f1, col_f2, col_f3 = st.columns([1, 1, 4])
+    # Dos columnas: una para Desde, otra para Hasta (vertical)
+    col_f1, col_f2 = st.columns(2)
     
     with col_f1:
+        st.markdown('<div class="fecha-vertical">', unsafe_allow_html=True)
         st.markdown('<p class="fecha-label">📅 Desde</p>', unsafe_allow_html=True)
         fecha_inicio = st.date_input("", value=st.session_state.fecha_inicio, key="fecha_inicio_input", label_visibility="collapsed")
         st.session_state.fecha_inicio = fecha_inicio
+        st.markdown('</div>', unsafe_allow_html=True)
     
     with col_f2:
+        st.markdown('<div class="fecha-vertical">', unsafe_allow_html=True)
         st.markdown('<p class="fecha-label">📅 Hasta</p>', unsafe_allow_html=True)
         fecha_fin = st.date_input("", value=st.session_state.fecha_fin, key="fecha_fin_input", label_visibility="collapsed")
         st.session_state.fecha_fin = fecha_fin
+        st.markdown('</div>', unsafe_allow_html=True)
     
     fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d")
     fecha_fin_str = fecha_fin.strftime("%Y-%m-%d")
@@ -463,7 +490,7 @@ elif menu == "🐔 Producción":
     st.caption(f"📌 Mostrando datos desde el **{fecha_inicio_str}** hasta el **{fecha_fin_str}**")
     st.markdown("---")
     
-    # Tabla de datos
+    # Tabla de resumen
     datos_resumen = []
     total_gallinas_generales = 0
     total_produccion_esperada = 0
@@ -496,6 +523,7 @@ elif menu == "🐔 Producción":
     df_resumen = pd.DataFrame(datos_resumen)
     st.dataframe(df_resumen, use_container_width=True, hide_index=True)
     
+    # Tarjetas
     total_mortalidad_periodo = sum(obtener_mortalidad_periodo(g["id"], fecha_inicio_str, fecha_fin_str) for g in galpones)
     
     col1, col2, col3 = st.columns(3)
