@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión FINAL - Secciones independientes
+# Versión FINAL - Con contador y botón regresar independiente
 # ============================================
 
 import streamlit as st
@@ -58,6 +58,17 @@ st.markdown("""
         color: #2E7D32;
     }
     
+    /* Botón regresar */
+    .stButton > button[key*="back"] {
+        background-color: #F9A825;
+        color: #2E7D32;
+    }
+    
+    .stButton > button[key*="back"]:hover {
+        background-color: #E07B00;
+        color: white;
+    }
+    
     .stTextInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #FFD600;
@@ -104,8 +115,22 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
-    /* Botón regresar */
-    .back-button {
+    /* Contador en línea */
+    .contador-linea {
+        display: inline-block;
+        background-color: #2E7D32;
+        color: white;
+        border-radius: 20px;
+        padding: 5px 15px;
+        font-weight: bold;
+        margin-left: 15px;
+        font-size: 14px;
+    }
+    
+    .titulo-con-contador {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         margin-bottom: 20px;
     }
 </style>
@@ -332,15 +357,12 @@ if menu == "🏠 Dashboard":
 
 elif menu == "🐔 Producción":
     
-    # Inicializar estado de la sección
     if 'seccion_produccion' not in st.session_state:
         st.session_state.seccion_produccion = "dashboard"
     
-    # Si estamos en el dashboard principal
     if st.session_state.seccion_produccion == "dashboard":
         st.title("🐔 Gestión de Producción")
         
-        # Botones horizontales
         col_b1, col_b2, col_b3 = st.columns(3)
         with col_b1:
             if st.button("📝 Registrar Producción", key="btn_registrar", use_container_width=True):
@@ -358,7 +380,6 @@ elif menu == "🐔 Producción":
         st.markdown("---")
         st.markdown("### 📊 Resumen de Inventario de Gallinas")
         
-        # Fechas
         fecha_fin_default = datetime.now()
         fecha_inicio_default = fecha_fin_default - timedelta(days=30)
         
@@ -376,7 +397,6 @@ elif menu == "🐔 Producción":
         st.caption(f"📌 Mostrando datos desde el **{fecha_inicio_str}** hasta el **{fecha_fin_str}**")
         st.markdown("---")
         
-        # Recargar datos
         produccion = cargar_datos(PRODUCCION_FILE, [])
         movimientos_gallinas = cargar_datos(MOVIMIENTOS_GALLINAS_FILE, [])
         
@@ -428,10 +448,12 @@ elif menu == "🐔 Producción":
     elif st.session_state.seccion_produccion == "registrar":
         st.title("📝 Registrar Producción Diaria")
         
-        # Botón regresar
-        if st.button("🔙 Regresar al Dashboard", key="back_registrar"):
-            st.session_state.seccion_produccion = "dashboard"
-            st.rerun()
+        # Botón regresar (flecha)
+        col_back, col_spacer = st.columns([1, 5])
+        with col_back:
+            if st.button("← REGRESAR", key="back_registrar", use_container_width=True):
+                st.session_state.seccion_produccion = "dashboard"
+                st.rerun()
         
         st.markdown("---")
         
@@ -452,16 +474,23 @@ elif menu == "🐔 Producción":
                 fecha = st.date_input("Fecha de producción", datetime.now())
                 
                 st.write("---")
-                st.subheader("Clasificación de huevos")
                 
+                # Título con contador dinámico
+                st.markdown("### Clasificación de huevos")
+                
+                # Crear campos de entrada
                 clasificacion = {}
                 cols = st.columns(2)
                 for i, cat in enumerate(categorias_data["categorias"]):
                     with cols[i % 2]:
                         clasificacion[cat] = st.number_input(f"{cat}", min_value=0, value=0, step=100, key=f"cat_{cat}")
                 
+                # Calcular total en tiempo real
                 total_ingresado = sum(clasificacion.values())
-                st.info(f"📊 Total de huevos a registrar: {total_ingresado:,}")
+                
+                # Mostrar contador junto al botón
+                st.markdown(f"---")
+                st.markdown(f"### 📊 TOTAL: **{total_ingresado:,}** huevos")
                 
                 if st.button("✅ GUARDAR Producción", type="primary", key="guardar_prod"):
                     if total_ingresado > 0:
@@ -472,6 +501,7 @@ elif menu == "🐔 Producción":
                             clasificacion_filtrada
                         )
                         st.success(f"✅ Producción registrada: {total_ingresado:,} huevos")
+                        st.balloons()
                         st.rerun()
                     else:
                         st.error("❌ Debe ingresar al menos un huevo")
@@ -483,17 +513,25 @@ elif menu == "🐔 Producción":
             2. Ingresa la **fecha** (hoy por defecto)
             3. Anota los números de la **clasificadora**
             4. Completa cada categoría
-            5. Presiona **GUARDAR**
+            5. Presiona **GUARDAR** para registrar la producción
             """)
+            
+            # Mostrar producción esperada
+            if galpones_activos and 'galpon_seleccionado' in locals():
+                gallinas_galpon = galpon_seleccionado["cantidad_gallinas"]
+                produccion_esperada = int(gallinas_galpon * 0.9)
+                st.info(f"📊 Producción esperada para este galpón (90%): **{produccion_esperada:,}** huevos")
     
     # ========== SECCIÓN: INVENTARIO GALLINAS ==========
     elif st.session_state.seccion_produccion == "inventario":
         st.title("🐔 Inventario de Gallinas")
         
-        # Botón regresar
-        if st.button("🔙 Regresar al Dashboard", key="back_inventario"):
-            st.session_state.seccion_produccion = "dashboard"
-            st.rerun()
+        # Botón regresar (flecha)
+        col_back, col_spacer = st.columns([1, 5])
+        with col_back:
+            if st.button("← REGRESAR", key="back_inventario", use_container_width=True):
+                st.session_state.seccion_produccion = "dashboard"
+                st.rerun()
         
         st.markdown("---")
         
@@ -555,6 +593,7 @@ elif menu == "🐔 Producción":
                         st.warning(f"⚠️ {cantidad_mov:,} gallinas registradas como mortalidad en {galpon_mov['nombre']}")
                     else:
                         st.info(f"📤 {cantidad_mov:,} gallinas descartadas de {galpon_mov['nombre']}")
+                    st.balloons()
                     st.rerun()
                 else:
                     st.error("❌ Error al registrar el movimiento")
@@ -563,14 +602,15 @@ elif menu == "🐔 Producción":
     elif st.session_state.seccion_produccion == "historial":
         st.title("📜 Historial de Movimientos de Gallinas")
         
-        # Botón regresar
-        if st.button("🔙 Regresar al Dashboard", key="back_historial"):
-            st.session_state.seccion_produccion = "dashboard"
-            st.rerun()
+        # Botón regresar (flecha)
+        col_back, col_spacer = st.columns([1, 5])
+        with col_back:
+            if st.button("← REGRESAR", key="back_historial", use_container_width=True):
+                st.session_state.seccion_produccion = "dashboard"
+                st.rerun()
         
         st.markdown("---")
         
-        # Fechas para filtrar historial
         col_f1, col_f2 = st.columns(2)
         with col_f1:
             fecha_hist_desde = st.date_input("Desde", datetime.now() - timedelta(days=30), key="hist_desde")
@@ -584,7 +624,6 @@ elif menu == "🐔 Producción":
             movimientos_filtrados = [m for m in movimientos_gallinas if fecha_desde_str <= m["fecha"] <= fecha_hasta_str]
             
             if movimientos_filtrados:
-                # Filtro por tipo
                 tipos = ["Todos"] + sorted(list(set(m["tipo"] for m in movimientos_filtrados)))
                 filtro_tipo = st.selectbox("Filtrar por tipo", tipos)
                 
@@ -598,7 +637,6 @@ elif menu == "🐔 Producción":
                     df_mostrar.columns = ["Fecha", " ", "Galpón", "Cantidad", "Motivo", "Anterior", "Nueva"]
                     st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
                     
-                    # Resumen
                     st.write("---")
                     st.subheader("📊 Resumen de movimientos en el período")
                     col1, col2, col3 = st.columns(3)
