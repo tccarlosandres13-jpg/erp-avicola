@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# Versión FINAL - Fechas actualizan dashboard
+# Versión FINAL - Secciones independientes
 # ============================================
 
 import streamlit as st
@@ -22,11 +22,9 @@ st.markdown("""
     .login-card {
         background-color: rgba(255, 255, 255, 0.95);
         border-radius: 20px;
-        padding: 40px 30px;
+        padding: 30px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         border: 2px solid #FFD600;
-        max-width: 450px;
-        margin: 0 auto;
     }
     
     .dora-title {
@@ -63,7 +61,7 @@ st.markdown("""
     .stTextInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #FFD600;
-        padding: 10px 15px;
+        padding: 8px 15px;
         font-size: 14px;
     }
     
@@ -104,6 +102,11 @@ st.markdown("""
         font-size: 18px;
         font-weight: bold;
         color: #FFD600 !important;
+    }
+    
+    /* Botón regresar */
+    .back-button {
+        margin-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -202,16 +205,7 @@ def registrar_movimiento_gallinas(galpon_id, tipo_movimiento, cantidad, motivo, 
     return True, movimiento
 
 def obtener_postura_real_periodo(galpon_id, fecha_inicio, fecha_fin):
-    """Calcula el porcentaje de postura real en un período de fechas"""
-    # Convertir fechas a string para comparar
-    fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d") if isinstance(fecha_inicio, datetime) else fecha_inicio
-    fecha_fin_str = fecha_fin.strftime("%Y-%m-%d") if isinstance(fecha_fin, datetime) else fecha_fin
-    
-    producciones_galpon = []
-    for p in produccion:
-        if p["galpon_id"] == galpon_id and fecha_inicio_str <= p["fecha"] <= fecha_fin_str:
-            producciones_galpon.append(p)
-    
+    producciones_galpon = [p for p in produccion if p["galpon_id"] == galpon_id and fecha_inicio <= p["fecha"] <= fecha_fin]
     if not producciones_galpon:
         return 0
     total_huevos = sum(p["total_huevos"] for p in producciones_galpon)
@@ -222,15 +216,7 @@ def obtener_postura_real_periodo(galpon_id, fecha_inicio, fecha_fin):
     return round((promedio_diario / cantidad_gallinas) * 100, 1)
 
 def obtener_mortalidad_periodo(galpon_id, fecha_inicio, fecha_fin):
-    """Calcula la mortalidad en un período de fechas"""
-    fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d") if isinstance(fecha_inicio, datetime) else fecha_inicio
-    fecha_fin_str = fecha_fin.strftime("%Y-%m-%d") if isinstance(fecha_fin, datetime) else fecha_fin
-    
-    mortalidad = 0
-    for m in movimientos_gallinas:
-        if m["galpon_id"] == galpon_id and m["tipo"] == "mortalidad" and fecha_inicio_str <= m["fecha"] <= fecha_fin_str:
-            mortalidad += m["cantidad"]
-    return mortalidad
+    return sum(m["cantidad"] for m in movimientos_gallinas if m["galpon_id"] == galpon_id and m["tipo"] == "mortalidad" and fecha_inicio <= m["fecha"] <= fecha_fin)
 
 def registrar_produccion(galpon_id, fecha, clasificacion):
     nuevo_registro = {"id": len(produccion) + 1, "galpon_id": galpon_id, "fecha": fecha, "clasificacion": clasificacion, "total_huevos": sum(clasificacion.values())}
@@ -269,24 +255,25 @@ if not st.session_state.logged_in:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         logo = cargar_logo()
         if logo:
-            st.image(logo, width=120)
+            st.image(logo, width=150)
         else:
-            st.markdown('<div style="text-align: center;"><span style="font-size: 80px;">🥚</span></div>', unsafe_allow_html=True)
+            st.markdown('<div style="text-align: center;"><span style="font-size: 100px;">🥚</span></div>', unsafe_allow_html=True)
         st.markdown('<h1 class="dora-title">HUEVOS DOÑA DORA</h1>', unsafe_allow_html=True)
         st.markdown('<p class="dora-subtitle">Sistema de Gestión Avícola</p>', unsafe_allow_html=True)
         usuario = st.text_input("👤 USUARIO", key="login_user", placeholder="Ingrese su usuario")
         password = st.text_input("🔒 CONTRASEÑA", type="password", key="login_pass", placeholder="Ingrese su contraseña")
-        if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
-            if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
-                st.session_state.logged_in = True
-                st.session_state.usuario = usuario
-                st.session_state.rol = usuarios[usuario]["rol"]
-                st.rerun()
-            else:
-                st.error("❌ Usuario o contraseña incorrectos")
+        col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+        with col_btn2:
+            if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
+                if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
+                    st.session_state.logged_in = True
+                    st.session_state.usuario = usuario
+                    st.session_state.rol = usuarios[usuario]["rol"]
+                    st.rerun()
+                else:
+                    st.error("❌ Usuario o contraseña incorrectos")
         with st.expander("📋 Credenciales de prueba"):
-            st.markdown("- **Administrador:** `admin` / `admin123`")
-            st.markdown("- **Auxiliar:** `auxiliar` / `produccion123`")
+            st.markdown("- **Administrador:** `admin` / `admin123`\n- **Auxiliar:** `auxiliar` / `produccion123`")
         st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
@@ -295,9 +282,9 @@ rol_actual = st.session_state.rol
 
 logo = cargar_logo()
 if logo:
-    st.sidebar.image(logo, width=70)
+    st.sidebar.image(logo, width=80)
 else:
-    st.sidebar.markdown('<p style="font-size: 36px; text-align: center;">🥚</p>', unsafe_allow_html=True)
+    st.sidebar.markdown('<p style="font-size: 40px; text-align: center;">🥚</p>', unsafe_allow_html=True)
 st.sidebar.markdown('<p class="sidebar-title">HUEVOS DOÑA DORA</p>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
 st.sidebar.write(f"**Usuario:** {usuario_actual}")
@@ -344,169 +331,289 @@ if menu == "🏠 Dashboard":
         st.info("No hay registros de producción aún.")
 
 elif menu == "🐔 Producción":
-    st.title("🐔 Gestión de Producción")
     
-    col_b1, col_b2, col_b3 = st.columns(3)
-    with col_b1:
-        ver_registro = st.button("📝 Registrar Producción", key="btn_registrar", use_container_width=True)
-    with col_b2:
-        ver_inventario = st.button("🐔 Inventario Gallinas", key="btn_inventario", use_container_width=True)
-    with col_b3:
-        ver_historial = st.button("📜 Historial Gallinas", key="btn_historial", use_container_width=True)
+    # Inicializar estado de la sección
+    if 'seccion_produccion' not in st.session_state:
+        st.session_state.seccion_produccion = "dashboard"
     
-    st.markdown("---")
-    st.markdown("### 📊 Resumen de Inventario de Gallinas")
-    
-    # Fechas por defecto (últimos 30 días)
-    fecha_fin_default = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    fecha_inicio_default = fecha_fin_default - timedelta(days=30)
-    
-    # Crear columnas para las fechas
-    col_f1, col_f2 = st.columns(2)
-    
-    with col_f1:
-        st.markdown("📅 **Desde**")
-        fecha_inicio = st.date_input("", value=fecha_inicio_default, key="fecha_inicio_input", label_visibility="collapsed")
-    
-    with col_f2:
-        st.markdown("📅 **Hasta**")
-        fecha_fin = st.date_input("", value=fecha_fin_default, key="fecha_fin_input", label_visibility="collapsed")
-    
-    # Convertir a string para comparar
-    fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d")
-    fecha_fin_str = fecha_fin.strftime("%Y-%m-%d")
-    
-    st.caption(f"📌 Mostrando datos desde el **{fecha_inicio_str}** hasta el **{fecha_fin_str}**")
-    st.markdown("---")
-    
-    # Recargar datos para asegurar que estén actualizados
-    produccion = cargar_datos(PRODUCCION_FILE, [])
-    movimientos_gallinas = cargar_datos(MOVIMIENTOS_GALLINAS_FILE, [])
-    
-    # Tabla de resumen
-    datos_resumen = []
-    total_gallinas_generales = 0
-    total_produccion_esperada = 0
-    
-    for galpon in galpones:
-        galpon_id = galpon["id"]
-        cantidad = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
-        total_gallinas_generales += cantidad
-        produccion_esperada = int(cantidad * 0.9)
-        total_produccion_esperada += produccion_esperada
+    # Si estamos en el dashboard principal
+    if st.session_state.seccion_produccion == "dashboard":
+        st.title("🐔 Gestión de Producción")
         
-        # Calcular mortalidad y postura con las fechas seleccionadas
-        mortalidad_periodo = obtener_mortalidad_periodo(galpon_id, fecha_inicio_str, fecha_fin_str)
-        postura_real = obtener_postura_real_periodo(galpon_id, fecha_inicio_str, fecha_fin_str)
+        # Botones horizontales
+        col_b1, col_b2, col_b3 = st.columns(3)
+        with col_b1:
+            if st.button("📝 Registrar Producción", key="btn_registrar", use_container_width=True):
+                st.session_state.seccion_produccion = "registrar"
+                st.rerun()
+        with col_b2:
+            if st.button("🐔 Inventario Gallinas", key="btn_inventario", use_container_width=True):
+                st.session_state.seccion_produccion = "inventario"
+                st.rerun()
+        with col_b3:
+            if st.button("📜 Historial Gallinas", key="btn_historial", use_container_width=True):
+                st.session_state.seccion_produccion = "historial"
+                st.rerun()
         
-        estado_color = {"produccion": "🟢", "mantenimiento": "🟡", "descanso": "🔵", "descarte": "🔴"}.get(galpon["estado"], "⚪")
-        if postura_real >= 85:
-            indicador = "🟢 Normal"
-        elif postura_real >= 70:
-            indicador = "🟡 Atención"
-        else:
-            indicador = "🔴 Crítico"
+        st.markdown("---")
+        st.markdown("### 📊 Resumen de Inventario de Gallinas")
         
-        datos_resumen.append({
-            "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
-            "Galpón": galpon["nombre"],
-            "Gallinas actuales": f"{cantidad:,}",
-            "Prod. esperada (90%)": f"{produccion_esperada:,}",
-            "Mortalidad (periodo)": f"{mortalidad_periodo:,}",
-            "Postura real": f"{postura_real}%",
-            "Indicador": indicador
-        })
+        # Fechas
+        fecha_fin_default = datetime.now()
+        fecha_inicio_default = fecha_fin_default - timedelta(days=30)
+        
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            st.markdown("📅 **Desde**")
+            fecha_inicio = st.date_input("", value=fecha_inicio_default, key="fecha_inicio_input", label_visibility="collapsed")
+        with col_f2:
+            st.markdown("📅 **Hasta**")
+            fecha_fin = st.date_input("", value=fecha_fin_default, key="fecha_fin_input", label_visibility="collapsed")
+        
+        fecha_inicio_str = fecha_inicio.strftime("%Y-%m-%d")
+        fecha_fin_str = fecha_fin.strftime("%Y-%m-%d")
+        
+        st.caption(f"📌 Mostrando datos desde el **{fecha_inicio_str}** hasta el **{fecha_fin_str}**")
+        st.markdown("---")
+        
+        # Recargar datos
+        produccion = cargar_datos(PRODUCCION_FILE, [])
+        movimientos_gallinas = cargar_datos(MOVIMIENTOS_GALLINAS_FILE, [])
+        
+        datos_resumen = []
+        total_gallinas_generales = 0
+        total_produccion_esperada = 0
+        
+        for galpon in galpones:
+            galpon_id = galpon["id"]
+            cantidad = inventario_gallinas.get(str(galpon_id), {}).get("cantidad", 0)
+            total_gallinas_generales += cantidad
+            produccion_esperada = int(cantidad * 0.9)
+            total_produccion_esperada += produccion_esperada
+            mortalidad_periodo = obtener_mortalidad_periodo(galpon_id, fecha_inicio_str, fecha_fin_str)
+            postura_real = obtener_postura_real_periodo(galpon_id, fecha_inicio_str, fecha_fin_str)
+            estado_color = {"produccion": "🟢", "mantenimiento": "🟡", "descanso": "🔵", "descarte": "🔴"}.get(galpon["estado"], "⚪")
+            if postura_real >= 85:
+                indicador = "🟢 Normal"
+            elif postura_real >= 70:
+                indicador = "🟡 Atención"
+            else:
+                indicador = "🔴 Crítico"
+            datos_resumen.append({
+                "Estado": f"{estado_color} {galpon['estado'].capitalize()}",
+                "Galpón": galpon["nombre"],
+                "Gallinas actuales": f"{cantidad:,}",
+                "Prod. esperada (90%)": f"{produccion_esperada:,}",
+                "Mortalidad (periodo)": f"{mortalidad_periodo:,}",
+                "Postura real": f"{postura_real}%",
+                "Indicador": indicador
+            })
+        
+        df_resumen = pd.DataFrame(datos_resumen)
+        st.dataframe(df_resumen, use_container_width=True, hide_index=True)
+        
+        total_mortalidad_periodo = sum(obtener_mortalidad_periodo(g["id"], fecha_inicio_str, fecha_fin_str) for g in galpones)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f'<div class="summary-card"><div class="summary-number">{total_gallinas_generales:,}</div><div class="summary-label">🐔 TOTAL GALLINAS EN PRODUCCIÓN</div></div>', unsafe_allow_html=True)
+        with col2:
+            st.markdown(f'<div class="summary-card"><div class="summary-number">{total_produccion_esperada:,}</div><div class="summary-label">🥚 PRODUCCIÓN ESPERADA (90%)</div></div>', unsafe_allow_html=True)
+        with col3:
+            st.markdown(f'<div class="summary-card"><div class="summary-number">{total_mortalidad_periodo:,}</div><div class="summary-label">⚠️ MORTALIDAD EN EL PERIODO</div></div>', unsafe_allow_html=True)
+        
+        st.info("👈 Presiona un botón para realizar una acción específica")
     
-    df_resumen = pd.DataFrame(datos_resumen)
-    st.dataframe(df_resumen, use_container_width=True, hide_index=True)
-    
-    # Calcular total de mortalidad en el período
-    total_mortalidad_periodo = 0
-    for galpon in galpones:
-        total_mortalidad_periodo += obtener_mortalidad_periodo(galpon["id"], fecha_inicio_str, fecha_fin_str)
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f'<div class="summary-card"><div class="summary-number">{total_gallinas_generales:,}</div><div class="summary-label">🐔 TOTAL GALLINAS EN PRODUCCIÓN</div></div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown(f'<div class="summary-card"><div class="summary-number">{total_produccion_esperada:,}</div><div class="summary-label">🥚 PRODUCCIÓN ESPERADA (90%)</div></div>', unsafe_allow_html=True)
-    with col3:
-        st.markdown(f'<div class="summary-card"><div class="summary-number">{total_mortalidad_periodo:,}</div><div class="summary-label">⚠️ MORTALIDAD EN EL PERIODO</div></div>', unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    if ver_registro:
-        st.subheader("📝 Registrar Producción Diaria")
+    # ========== SECCIÓN: REGISTRAR PRODUCCIÓN ==========
+    elif st.session_state.seccion_produccion == "registrar":
+        st.title("📝 Registrar Producción Diaria")
+        
+        # Botón regresar
+        if st.button("🔙 Regresar al Dashboard", key="back_registrar"):
+            st.session_state.seccion_produccion = "dashboard"
+            st.rerun()
+        
+        st.markdown("---")
+        
         col1, col2 = st.columns(2)
+        
         with col1:
             galpones_activos = [g for g in galpones if g["estado"] == "produccion" and g["cantidad_gallinas"] > 0]
             if not galpones_activos:
                 st.warning("⚠️ No hay galpones activos con gallinas.")
             else:
-                galpon_seleccionado = st.selectbox("Seleccione el galpón", galpones_activos, format_func=lambda x: f"{x['nombre']} ({x['cantidad_gallinas']:,} gallinas)", key="prod_galpon")
+                galpon_seleccionado = st.selectbox(
+                    "Seleccione el galpón",
+                    galpones_activos,
+                    format_func=lambda x: f"{x['nombre']} ({x['cantidad_gallinas']:,} gallinas)",
+                    key="prod_galpon"
+                )
+                
                 fecha = st.date_input("Fecha de producción", datetime.now())
+                
                 st.write("---")
                 st.subheader("Clasificación de huevos")
+                
                 clasificacion = {}
                 cols = st.columns(2)
                 for i, cat in enumerate(categorias_data["categorias"]):
                     with cols[i % 2]:
                         clasificacion[cat] = st.number_input(f"{cat}", min_value=0, value=0, step=100, key=f"cat_{cat}")
+                
                 total_ingresado = sum(clasificacion.values())
                 st.info(f"📊 Total de huevos a registrar: {total_ingresado:,}")
-                if st.button("✅ Registrar Producción", type="primary", key="registrar_prod"):
+                
+                if st.button("✅ GUARDAR Producción", type="primary", key="guardar_prod"):
                     if total_ingresado > 0:
                         clasificacion_filtrada = {k: v for k, v in clasificacion.items() if v > 0}
-                        registrar_produccion(galpon_seleccionado["id"], fecha.strftime("%Y-%m-%d"), clasificacion_filtrada)
+                        registrar_produccion(
+                            galpon_seleccionado["id"],
+                            fecha.strftime("%Y-%m-%d"),
+                            clasificacion_filtrada
+                        )
                         st.success(f"✅ Producción registrada: {total_ingresado:,} huevos")
                         st.rerun()
                     else:
                         st.error("❌ Debe ingresar al menos un huevo")
+        
         with col2:
             st.subheader("📋 Instrucciones")
-            st.write("1. Selecciona el **galpón** que terminó de recolectar\n2. Ingresa la **fecha** (hoy por defecto)\n3. Anota los números de la **clasificadora**\n4. Completa cada categoría\n5. Presiona **Registrar Producción**")
+            st.write("""
+            1. Selecciona el **galpón** que terminó de recolectar
+            2. Ingresa la **fecha** (hoy por defecto)
+            3. Anota los números de la **clasificadora**
+            4. Completa cada categoría
+            5. Presiona **GUARDAR**
+            """)
     
-    elif ver_inventario:
-        st.subheader("📝 Registrar movimiento de gallinas")
+    # ========== SECCIÓN: INVENTARIO GALLINAS ==========
+    elif st.session_state.seccion_produccion == "inventario":
+        st.title("🐔 Inventario de Gallinas")
+        
+        # Botón regresar
+        if st.button("🔙 Regresar al Dashboard", key="back_inventario"):
+            st.session_state.seccion_produccion = "dashboard"
+            st.rerun()
+        
+        st.markdown("---")
+        
         col1, col2 = st.columns(2)
+        
         with col1:
-            galpon_mov = st.selectbox("Seleccione el galpón", galpones, format_func=lambda x: f"{x['nombre']} - Actual: {inventario_gallinas.get(str(x['id']), {}).get('cantidad', 0):,} gallinas", key="galpon_mov")
-            tipo_movimiento = st.selectbox("Tipo de movimiento", ["levante", "mortalidad", "descarte"], format_func=lambda x: {"levante": "➕ Ingreso de levante", "mortalidad": "⚠️ Mortalidad", "descarte": "📤 Descarte"}.get(x, x), key="tipo_mov")
+            galpon_mov = st.selectbox(
+                "Seleccione el galpón",
+                galpones,
+                format_func=lambda x: f"{x['nombre']} - Actual: {inventario_gallinas.get(str(x['id']), {}).get('cantidad', 0):,} gallinas",
+                key="galpon_mov"
+            )
+            
+            tipo_movimiento = st.selectbox(
+                "Tipo de movimiento",
+                ["levante", "mortalidad", "descarte"],
+                format_func=lambda x: {
+                    "levante": "➕ Ingreso de levante (nuevas gallinas)",
+                    "mortalidad": "⚠️ Mortalidad (gallinas muertas)",
+                    "descarte": "📤 Descarte (gallinas retiradas)"
+                }.get(x, x),
+                key="tipo_mov"
+            )
+        
         with col2:
-            cantidad_mov = st.number_input("Cantidad", min_value=1, value=1, step=10, key="cant_mov")
-            motivos = {"levante": ["Llegada de pollitas", "Traslado desde levante", "Compra de aves"], "mortalidad": ["Enfermedad", "Golpe de calor", "Canibalismo", "Problema respiratorio"], "descarte": ["Fin de ciclo", "Baja producción", "Enfermedad crónica"]}
+            cantidad_mov = st.number_input("Cantidad de gallinas", min_value=1, value=1, step=10, key="cant_mov")
+            
+            motivos = {
+                "levante": ["Llegada de pollitas", "Traslado desde levante", "Compra de aves"],
+                "mortalidad": ["Enfermedad", "Golpe de calor", "Canibalismo", "Problema respiratorio", "Otra causa"],
+                "descarte": ["Fin de ciclo", "Baja producción", "Enfermedad crónica", "Renovación de lote"]
+            }
+            
             motivo = st.selectbox("Motivo", motivos.get(tipo_movimiento, ["Otro"]), key="motivo")
-            motivo_extra = st.text_input("Observaciones", placeholder="Opcional...", key="motivo_extra")
+            motivo_extra = st.text_input("Observaciones adicionales (opcional)", placeholder="Detalles específicos...", key="motivo_extra")
             motivo_completo = motivo + (f" - {motivo_extra}" if motivo_extra else "")
-        fecha_mov = st.date_input("Fecha", datetime.now(), key="fecha_mov")
-        if st.button("✅ Registrar movimiento", type="primary", key="btn_mov"):
+        
+        fecha_mov = st.date_input("Fecha del movimiento", datetime.now(), key="fecha_mov")
+        
+        if st.button("✅ GUARDAR Movimiento", type="primary", key="guardar_mov"):
             cantidad_actual = inventario_gallinas.get(str(galpon_mov["id"]), {}).get("cantidad", 0)
-            if (tipo_movimiento == "mortalidad" or tipo_movimiento == "descarte") and cantidad_mov > cantidad_actual:
-                st.error(f"❌ Solo hay {cantidad_actual:,} gallinas")
+            
+            if tipo_movimiento == "mortalidad" and cantidad_mov > cantidad_actual:
+                st.error(f"❌ No hay suficientes gallinas. Actualmente hay {cantidad_actual:,} gallinas.")
+            elif tipo_movimiento == "descarte" and cantidad_mov > cantidad_actual:
+                st.error(f"❌ No hay suficientes gallinas. Actualmente hay {cantidad_actual:,} gallinas.")
             else:
-                success, _ = registrar_movimiento_gallinas(galpon_mov["id"], tipo_movimiento, cantidad_mov, motivo_completo, fecha_mov.strftime("%Y-%m-%d"))
+                success, _ = registrar_movimiento_gallinas(
+                    galpon_mov["id"],
+                    tipo_movimiento,
+                    cantidad_mov,
+                    motivo_completo,
+                    fecha_mov.strftime("%Y-%m-%d")
+                )
                 if success:
-                    st.success(f"✅ Movimiento registrado")
+                    if tipo_movimiento == "levante":
+                        st.success(f"✅ {cantidad_mov:,} gallinas ingresadas a {galpon_mov['nombre']}")
+                    elif tipo_movimiento == "mortalidad":
+                        st.warning(f"⚠️ {cantidad_mov:,} gallinas registradas como mortalidad en {galpon_mov['nombre']}")
+                    else:
+                        st.info(f"📤 {cantidad_mov:,} gallinas descartadas de {galpon_mov['nombre']}")
                     st.rerun()
                 else:
-                    st.error("❌ Error")
+                    st.error("❌ Error al registrar el movimiento")
     
-    elif ver_historial:
-        st.subheader("📜 Historial de movimientos")
+    # ========== SECCIÓN: HISTORIAL GALLINAS ==========
+    elif st.session_state.seccion_produccion == "historial":
+        st.title("📜 Historial de Movimientos de Gallinas")
+        
+        # Botón regresar
+        if st.button("🔙 Regresar al Dashboard", key="back_historial"):
+            st.session_state.seccion_produccion = "dashboard"
+            st.rerun()
+        
+        st.markdown("---")
+        
+        # Fechas para filtrar historial
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            fecha_hist_desde = st.date_input("Desde", datetime.now() - timedelta(days=30), key="hist_desde")
+        with col_f2:
+            fecha_hist_hasta = st.date_input("Hasta", datetime.now(), key="hist_hasta")
+        
+        fecha_desde_str = fecha_hist_desde.strftime("%Y-%m-%d")
+        fecha_hasta_str = fecha_hist_hasta.strftime("%Y-%m-%d")
+        
         if movimientos_gallinas:
-            movimientos_filtrados = [m for m in movimientos_gallinas if fecha_inicio_str <= m["fecha"] <= fecha_fin_str]
+            movimientos_filtrados = [m for m in movimientos_gallinas if fecha_desde_str <= m["fecha"] <= fecha_hasta_str]
+            
             if movimientos_filtrados:
-                df_mov = pd.DataFrame(movimientos_filtrados[::-1])
-                df_mov["tipo_icono"] = df_mov["tipo"].map({"levante":"➕","mortalidad":"⚠️","descarte":"📤"})
-                df_mostrar = df_mov[["fecha","tipo_icono","galpon_nombre","cantidad","motivo","cantidad_anterior","cantidad_nueva"]]
-                df_mostrar.columns = ["Fecha"," ","Galpón","Cantidad","Motivo","Anterior","Nueva"]
-                st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
+                # Filtro por tipo
+                tipos = ["Todos"] + sorted(list(set(m["tipo"] for m in movimientos_filtrados)))
+                filtro_tipo = st.selectbox("Filtrar por tipo", tipos)
+                
+                if filtro_tipo != "Todos":
+                    movimientos_filtrados = [m for m in movimientos_filtrados if m["tipo"] == filtro_tipo]
+                
+                if movimientos_filtrados:
+                    df_mov = pd.DataFrame(movimientos_filtrados[::-1])
+                    df_mov["tipo_icono"] = df_mov["tipo"].map({"levante": "➕", "mortalidad": "⚠️", "descarte": "📤"})
+                    df_mostrar = df_mov[["fecha", "tipo_icono", "galpon_nombre", "cantidad", "motivo", "cantidad_anterior", "cantidad_nueva"]]
+                    df_mostrar.columns = ["Fecha", " ", "Galpón", "Cantidad", "Motivo", "Anterior", "Nueva"]
+                    st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
+                    
+                    # Resumen
+                    st.write("---")
+                    st.subheader("📊 Resumen de movimientos en el período")
+                    col1, col2, col3 = st.columns(3)
+                    total_levante = sum(m["cantidad"] for m in movimientos_filtrados if m["tipo"] == "levante")
+                    total_mortalidad = sum(m["cantidad"] for m in movimientos_filtrados if m["tipo"] == "mortalidad")
+                    total_descarte = sum(m["cantidad"] for m in movimientos_filtrados if m["tipo"] == "descarte")
+                    col1.metric("➕ Total Levante", f"{total_levante:,}")
+                    col2.metric("⚠️ Total Mortalidad", f"{total_mortalidad:,}")
+                    col3.metric("📤 Total Descarte", f"{total_descarte:,}")
+                else:
+                    st.info("No hay movimientos con el filtro seleccionado.")
             else:
-                st.info("No hay movimientos en el período")
+                st.info(f"No hay movimientos en el período seleccionado ({fecha_desde_str} a {fecha_hasta_str})")
         else:
-            st.info("No hay movimientos registrados")
-    else:
-        st.info("👈 Presiona un botón para comenzar")
+            st.info("No hay movimientos registrados aún.")
 
 elif menu == "📦 Inventario Huevos":
     st.title("📦 Inventario - Bodega 1 (Granja San Miguel)")
