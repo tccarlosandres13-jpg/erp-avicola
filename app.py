@@ -33,64 +33,87 @@ st.markdown("""
     .login-card {
         background-color: rgba(255, 255, 255, 0.95);
         border-radius: 20px;
-        padding: 30px;
+        padding: 25px 20px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         border: 2px solid #FFD600;
         height: 100%;
-        min-height: 400px;
+        min-height: 450px;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
     
-    .dora-title {
+    /* TÍTULO CON ESTILO GEO (geométrico/moderno) */
+    .dora-title-geo {
         text-align: center;
         color: #2E7D32;
-        font-size: 2rem;
-        font-weight: bold;
+        font-size: 1.8rem;
+        font-weight: 900;
         margin-bottom: 5px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-family: 'Arial Black', 'Impact', sans-serif;
+        text-shadow: 2px 2px 0px rgba(249, 168, 37, 0.3);
     }
     
     .dora-subtitle {
         text-align: center;
         color: #F9A825;
-        font-size: 1rem;
-        margin-bottom: 30px;
+        font-size: 0.9rem;
+        margin-bottom: 25px;
         font-weight: bold;
+        letter-spacing: 3px;
+        text-transform: uppercase;
     }
     
+    /* CAMPOS DE TEXTO MÁS PEQUEÑOS */
+    .stTextInput > div > div > input {
+        border-radius: 25px;
+        border: 2px solid #FFD600;
+        padding: 6px 12px;
+        font-size: 13px;
+        height: 38px;
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #2E7D32;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+    }
+    
+    /* BOTONES */
     .stButton > button {
-        background-color: #2E7D32;
+        background: linear-gradient(135deg, #2E7D32, #388E3C);
         color: white;
         border-radius: 25px;
-        padding: 10px 30px;
+        padding: 8px 20px;
         font-weight: bold;
+        font-size: 14px;
         border: none;
         width: 100%;
+        box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+        transition: all 0.3s ease;
+        height: 42px;
     }
     
     .stButton > button:hover {
-        background-color: #F9A825;
+        background: linear-gradient(135deg, #F9A825, #FFC107);
         color: #2E7D32;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(249, 168, 37, 0.4);
     }
     
     .stButton > button[key*="back"] {
-        background-color: #F9A825;
+        background: linear-gradient(135deg, #F9A825, #FFC107);
         color: #2E7D32;
     }
     
     .stButton > button[key*="back"]:hover {
-        background-color: #E07B00;
+        background: linear-gradient(135deg, #E07B00, #F9A825);
         color: white;
     }
     
-    .stTextInput > div > div > input {
-        border-radius: 25px;
-        border: 2px solid #FFD600;
-        padding: 8px 15px;
-        font-size: 14px;
-    }
-    
+    /* MÉTRICAS */
     [data-testid="stMetricValue"] {
         color: #2E7D32;
     }
@@ -115,6 +138,7 @@ st.markdown("""
         color: #666;
     }
     
+    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);
     }
@@ -130,23 +154,26 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
-    /* Ajuste para la columna del logo */
+    /* LOGO EN SIDEBAR */
     .logo-container {
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100%;
-        min-height: 400px;
+        min-height: 450px;
         background-color: rgba(255, 255, 255, 0.8);
         border-radius: 20px;
         border: 2px solid #FFD600;
         padding: 20px;
     }
     
-    .logo-container img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
+    /* EXPANDER */
+    .streamlit-expanderHeader {
+        background-color: rgba(46, 125, 50, 0.05);
+        border-radius: 12px;
+        font-weight: 600;
+        color: #2E7D32;
+        font-size: 13px;
     }
 </style>
 """, unsafe_allow_html=True)
