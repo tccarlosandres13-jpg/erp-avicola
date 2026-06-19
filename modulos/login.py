@@ -4,7 +4,6 @@
 
 import streamlit as st
 from modulos.datos import usuarios, hash_password, cargar_logo
-import random
 from datetime import datetime
 
 def mostrar_login():
@@ -23,24 +22,46 @@ def mostrar_login():
         "🌈 La calidad es nuestro sello de identidad."
     ]
     
-    # Seleccionar mensaje según el día del mes (cambia cada día)
     dia = datetime.now().day
     mensaje = mensajes[dia % len(mensajes)]
     
-    # ========== CREAR 2 COLUMNAS: LOGO IZQUIERDA, FORMULARIO DERECHA ==========
+    # ========== CREAR 2 COLUMNAS ==========
     col_izq, col_der = st.columns([1, 1])
     
-    # ========== COLUMNA IZQUIERDA: LOGO ==========
+    # ========== COLUMNA IZQUIERDA: LOGO (ANCHO Y ALTO COMPLETO) ==========
     with col_izq:
         logo = cargar_logo()
         if logo:
-            # Mostrar el logo ocupando toda la columna
-            st.image(logo, use_container_width=True)
+            # Usar contenedor con altura completa
+            st.markdown(
+                f"""
+                <div style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100%;
+                    min-height: 520px;
+                    background: rgba(255,255,255,0.9);
+                    border-radius: 20px;
+                    border: 2px solid #FFD600;
+                    padding: 10px;
+                    overflow: hidden;
+                ">
+                    <img src="data:image/jpeg;base64,{logo_para_html(logo)}" 
+                         style="
+                             width: 100%;
+                             height: 100%;
+                             max-height: 500px;
+                             object-fit: contain;
+                         ">
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
         else:
-            # Si no hay logo, mostrar un huevo grande
             st.markdown(
                 """
-                <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 450px; background: white; border-radius: 20px; border: 2px solid #FFD600; padding: 20px;">
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 520px; background: white; border-radius: 20px; border: 2px solid #FFD600; padding: 20px;">
                     <span style="font-size: 180px;">🥚</span>
                 </div>
                 """,
@@ -55,9 +76,7 @@ def mostrar_login():
         st.markdown('<h1 class="dora-title-geo">🥚 HUEVOS DOÑA DORA</h1>', unsafe_allow_html=True)
         st.markdown('<p class="dora-subtitle">Sistema de Gestión Avícola</p>', unsafe_allow_html=True)
         
-        # Campos más pequeños (contenedor con tamaño reducido)
         with st.container():
-            # Usar columnas para centrar los campos
             col_campo1, col_campo2, col_campo3 = st.columns([1, 2, 1])
             with col_campo2:
                 usuario = st.text_input("👤 USUARIO", key="login_user", placeholder="Ingrese su usuario")
@@ -72,11 +91,28 @@ def mostrar_login():
                     else:
                         st.error("❌ Usuario o contraseña incorrectos")
         
-        # Mensaje motivacional del día
+        # ========== MENSAJE MOTIVACIONAL DENTRO DE CUADRO BLANCO PEQUEÑO ==========
         st.markdown("---")
         st.markdown(f"""
-        <div style="text-align: center; padding: 10px; background: linear-gradient(135deg, #E8F5E9, #FFF9C4); border-radius: 15px; border-left: 4px solid #2E7D32;">
-            <p style="font-size: 14px; color: #2E7D32; font-style: italic; margin: 0;">
+        <div style="
+            background: white;
+            border-radius: 12px;
+            padding: 8px 15px;
+            margin: 5px 0 15px 0;
+            border-left: 4px solid #2E7D32;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        ">
+            <p style="
+                font-size: 13px;
+                color: #2E7D32;
+                font-style: italic;
+                margin: 0;
+                font-weight: 500;
+            ">
                 💬 {mensaje}
             </p>
         </div>
@@ -87,3 +123,20 @@ def mostrar_login():
             st.markdown("- **Auxiliar:** `auxiliar` / `produccion123`")
         
         st.markdown('</div>', unsafe_allow_html=True)
+
+# ============================================
+# FUNCIÓN PARA CONVERTIR LOGO A BASE64
+# ============================================
+
+def logo_para_html(logo):
+    import io
+    import base64
+    from PIL import Image
+    
+    # Convertir la imagen a bytes
+    buffered = io.BytesIO()
+    if logo.mode == 'RGBA':
+        logo = logo.convert('RGB')
+    logo.save(buffered, format="JPEG", quality=85)
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    return img_str
