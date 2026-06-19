@@ -37,7 +37,8 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         border: 2px solid #FFD600;
         height: 100%;
-        min-height: 520px;
+        min-height: 550px;
+        max-height: 600px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -60,7 +61,7 @@ st.markdown("""
         text-align: center;
         color: #F9A825;
         font-size: 0.8rem;
-        margin-bottom: 20px;
+        margin-bottom: 18px;
         font-weight: bold;
         letter-spacing: 3px;
         text-transform: uppercase;
