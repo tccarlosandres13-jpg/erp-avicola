@@ -22,14 +22,14 @@ st.markdown("""
         height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: linear-gradient(135deg, #E8F5E9 0%, #FFF9C4 100%);
+        background: linear-gradient(135deg, #e8f5e9 0%, #fff9c4 100%);
     }
     
     .stApp > header {
         background: transparent !important;
     }
     
-    /* COLUMNAS AL 100% */
+    /* COLUMNAS 100% */
     .row-widget.stColumns {
         height: 100vh !important;
         min-height: 100vh !important;
@@ -45,14 +45,15 @@ st.markdown("""
         justify-content: center !important;
     }
     
-    /* CAMPOS DE TEXTO */
+    /* INPUTS */
     .stTextInput > div > div > input {
         border-radius: 12px !important;
-        border: 2px solid #E0E0E0 !important;
+        border: 2px solid #e0e0e0 !important;
         padding: 10px 16px !important;
         font-size: 14px !important;
         height: 48px !important;
-        background-color: #F8F9FA !important;
+        background-color: #f8f9fa !important;
+        margin-bottom: 14px !important;
         transition: all 0.3s ease !important;
     }
     
@@ -76,6 +77,7 @@ st.markdown("""
         transition: all 0.3s ease !important;
         height: 48px !important;
         letter-spacing: 1px !important;
+        margin-top: 4px !important;
     }
     
     .stButton > button:hover {
@@ -107,6 +109,22 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
+    /* EXPANDER */
+    .streamlit-expanderHeader {
+        background: transparent !important;
+        color: #2E7D32 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        border-bottom: 1px dashed #e0e0e0 !important;
+        border-radius: 0 !important;
+        padding: 8px 0 !important;
+        justify-content: center !important;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        color: #F9A825 !important;
+    }
+    
     /* TARJETAS */
     .summary-card {
         background: white !important;
@@ -128,20 +146,10 @@ st.markdown("""
         font-weight: 500 !important;
     }
     
-    /* EXPANDER */
+    /* EXPANDER EN LOGIN */
     .streamlit-expanderHeader {
-        background: transparent !important;
-        color: #2E7D32 !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        border-bottom: 1px dashed #E0E0E0 !important;
-        border-radius: 0 !important;
-        padding: 8px 0 !important;
         justify-content: center !important;
-    }
-    
-    .streamlit-expanderHeader:hover {
-        color: #F9A825 !important;
+        font-size: 13px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -199,10 +207,6 @@ if st.sidebar.button("🚪 Cerrar Sesión"):
     st.session_state.logged_in = False
     st.session_state.usuario = None
     st.rerun()
-
-# ============================================
-# NAVEGACIÓN
-# ============================================
 
 if menu == "🏠 Dashboard":
     mostrar_dashboard()
