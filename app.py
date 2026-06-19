@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# VERSIÓN COMPLETA CORREGIDA
+# VERSIÓN MODERNA Y PROFESIONAL
 # ============================================
 
 import streamlit as st
@@ -23,7 +23,7 @@ st.markdown("""
         height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: linear-gradient(135deg, #e8f5e9 0%, #fff9c4 100%);
+        background: linear-gradient(135deg, #f0f7f0 0%, #fff9e6 100%);
     }
     
     .stApp > header {
@@ -36,11 +36,11 @@ st.markdown("""
     }
     
     .stTextInput > div > div > input {
-        border-radius: 12px !important;
-        border: 2px solid #e0e0e0 !important;
-        padding: 10px 16px !important;
+        border-radius: 14px !important;
+        border: 2px solid #e8e8e8 !important;
+        padding: 12px 18px !important;
         font-size: 14px !important;
-        height: 48px !important;
+        height: 50px !important;
         background-color: #f8f9fa !important;
         margin-bottom: 14px !important;
         transition: all 0.3s ease !important;
@@ -55,23 +55,23 @@ st.markdown("""
     .stButton > button {
         background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
         color: white !important;
-        border-radius: 12px !important;
-        padding: 12px 20px !important;
+        border-radius: 14px !important;
+        padding: 12px 24px !important;
         font-weight: 700 !important;
         font-size: 15px !important;
         border: none !important;
         width: 100% !important;
-        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25) !important;
+        box-shadow: 0 4px 20px rgba(46, 125, 50, 0.25) !important;
         transition: all 0.3s ease !important;
-        height: 48px !important;
+        height: 50px !important;
         letter-spacing: 1px !important;
         margin-top: 4px !important;
     }
     
     .stButton > button:hover {
         background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(46, 125, 50, 0.35) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 30px rgba(46, 125, 50, 0.35) !important;
     }
     
     [data-testid="stSidebar"] {
@@ -94,6 +94,7 @@ st.markdown("""
         font-size: 18px !important;
         font-weight: 700 !important;
         color: #FFD600 !important;
+        letter-spacing: 1px !important;
     }
     
     .streamlit-expanderHeader {
