@@ -1,5 +1,5 @@
 # ============================================
-# MÓDULO: LOGIN (Logo izquierda - formulario + mensaje derecha)
+# MÓDULO: LOGIN (Diseño mejorado - sin cuadros blancos innecesarios)
 # ============================================
 
 import streamlit as st
@@ -30,11 +30,11 @@ def mostrar_login():
     # ========== CREAR 2 COLUMNAS ==========
     col_izq, col_der = st.columns([1, 1])
     
-    # ========== COLUMNA IZQUIERDA: LOGO (ANCHO Y ALTO COMPLETO) ==========
+    # ========== COLUMNA IZQUIERDA: LOGO (SIN CUADRO BLANCO) ==========
     with col_izq:
         logo = cargar_logo()
         if logo:
-            # Convertir logo a base64 para mostrarlo con altura completa
+            # Convertir logo a base64
             buffered = io.BytesIO()
             if logo.mode == 'RGBA':
                 logo = logo.convert('RGB')
@@ -48,18 +48,15 @@ def mostrar_login():
                     justify-content: center;
                     align-items: center;
                     height: 100vh;
-                    min-height: 550px;
-                    max-height: 600px;
-                    background: rgba(255,255,255,0.95);
-                    border-radius: 20px;
-                    border: 2px solid #FFD600;
-                    padding: 5px;
+                    min-height: 100vh;
+                    background: transparent;
+                    padding: 0;
                     overflow: hidden;
                 ">
                     <img src="data:image/jpeg;base64,{img_str}" 
                          style="
                              width: 100%;
-                             height: 100%;
+                             height: 100vh;
                              object-fit: contain;
                          ">
                 </div>
@@ -69,7 +66,7 @@ def mostrar_login():
         else:
             st.markdown(
                 """
-                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; min-height: 550px; max-height: 600px; background: white; border-radius: 20px; border: 2px solid #FFD600; padding: 20px;">
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: transparent;">
                     <span style="font-size: 150px;">🥚</span>
                 </div>
                 """,
@@ -77,15 +74,42 @@ def mostrar_login():
             )
             st.info("💡 Sube el archivo 'logo.jpeg' o 'logo.jpg' a la raíz del repositorio")
     
-    # ========== COLUMNA DERECHA: TÍTULO + FORMULARIO + MENSAJE ==========
+    # ========== COLUMNA DERECHA: MENSAJE + TÍTULO + FORMULARIO ==========
     with col_der:
-        # TARJETA PRINCIPAL
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         
+        # ========== MENSAJE MOTIVACIONAL ARRIBA (encima del título) ==========
+        st.markdown(f"""
+        <div style="
+            background: white;
+            border-radius: 15px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border: 2px solid #FFD600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            text-align: center;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        ">
+            <p style="
+                font-size: 14px;
+                color: #2E7D32;
+                font-style: italic;
+                margin: 0;
+                font-weight: 500;
+                line-height: 1.5;
+            ">
+                💬 {mensaje}
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # ========== TÍTULO ==========
         st.markdown('<h1 class="dora-title-geo">🥚 HUEVOS DOÑA DORA</h1>', unsafe_allow_html=True)
         st.markdown('<p class="dora-subtitle">Sistema de Gestión Avícola</p>', unsafe_allow_html=True)
         
-        # FORMULARIO
+        # ========== FORMULARIO ==========
         with st.container():
             col_campo1, col_campo2, col_campo3 = st.columns([1, 2, 1])
             with col_campo2:
@@ -101,32 +125,7 @@ def mostrar_login():
                     else:
                         st.error("❌ Usuario o contraseña incorrectos")
         
-        # ========== CUADRO BLANCO PEQUEÑO CON MENSAJE MOTIVACIONAL ==========
-        st.markdown("""
-        <div style="
-            background: white;
-            border-radius: 15px;
-            padding: 12px 20px;
-            margin: 15px auto 10px auto;
-            border: 2px solid #FFD600;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-            text-align: center;
-            max-width: 85%;
-        ">
-            <p style="
-                font-size: 14px;
-                color: #2E7D32;
-                font-style: italic;
-                margin: 0;
-                font-weight: 500;
-                line-height: 1.5;
-            ">
-                💬 {mensaje}
-            </p>
-        </div>
-        """.format(mensaje=mensaje), unsafe_allow_html=True)
-        
-        # CREDENCIALES
+        # ========== CREDENCIALES ==========
         with st.expander("📋 Credenciales de prueba"):
             st.markdown("- **Administrador:** `admin` / `admin123`")
             st.markdown("- **Auxiliar:** `auxiliar` / `produccion123`")
