@@ -26,19 +26,49 @@ st.set_page_config(page_title="Doña Dora - ERP", page_icon="🥚", layout="wide
 
 st.markdown("""
 <style>
-    .stApp {
+    /* FONDO AL 100% DE LA PANTALLA */
+    html, body, .stApp {
+        height: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         background: linear-gradient(135deg, #E8F5E9 0%, #FFF9C4 100%);
     }
     
+    .stApp > header {
+        background: transparent !important;
+    }
+    
+    .stApp > div {
+        height: 100% !important;
+    }
+    
+    /* COLUMNAS AL 100% */
+    .row-widget.stColumns {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        display: flex !important;
+        align-items: stretch !important;
+    }
+    
+    .row-widget.stColumns > div {
+        height: 100vh !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    /* TARJETA DE LOGIN - SIN CUADRO BLANCO GRANDE ARRIBA */
     .login-card {
-        background-color: rgba(255, 255, 255, 0.95);
+        background-color: rgba(255, 255, 255, 0.92);
         border-radius: 20px;
-        padding: 25px 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 30px 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         border: 2px solid #FFD600;
-        height: 100%;
-        min-height: 550px;
-        max-height: 600px;
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -48,7 +78,7 @@ st.markdown("""
     .dora-title-geo {
         text-align: center;
         color: #2E7D32;
-        font-size: 1.6rem;
+        font-size: 1.8rem;
         font-weight: 900;
         margin-bottom: 5px;
         letter-spacing: 2px;
@@ -60,8 +90,8 @@ st.markdown("""
     .dora-subtitle {
         text-align: center;
         color: #F9A825;
-        font-size: 0.8rem;
-        margin-bottom: 18px;
+        font-size: 0.85rem;
+        margin-bottom: 25px;
         font-weight: bold;
         letter-spacing: 3px;
         text-transform: uppercase;
@@ -71,9 +101,9 @@ st.markdown("""
     .stTextInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #FFD600;
-        padding: 5px 12px;
-        font-size: 12px;
-        height: 35px;
+        padding: 6px 14px;
+        font-size: 13px;
+        height: 38px;
         background-color: rgba(255, 255, 255, 0.9);
     }
     
@@ -87,14 +117,14 @@ st.markdown("""
         background: linear-gradient(135deg, #2E7D32, #388E3C);
         color: white;
         border-radius: 25px;
-        padding: 7px 18px;
+        padding: 8px 20px;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 14px;
         border: none;
         width: 100%;
         box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
         transition: all 0.3s ease;
-        height: 38px;
+        height: 42px;
     }
     
     .stButton > button:hover {
@@ -162,6 +192,14 @@ st.markdown("""
         font-weight: 600;
         color: #2E7D32;
         font-size: 13px;
+    }
+    
+    /* FONDO DEL LOGO - TRANSPARENTE */
+    .logo-container {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
