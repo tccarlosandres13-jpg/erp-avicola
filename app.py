@@ -37,17 +37,17 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         border: 2px solid #FFD600;
         height: 100%;
-        min-height: 450px;
+        min-height: 520px;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
     
-    /* TÍTULO CON ESTILO GEO (geométrico/moderno) */
+    /* TÍTULO CON ESTILO GEO */
     .dora-title-geo {
         text-align: center;
         color: #2E7D32;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 900;
         margin-bottom: 5px;
         letter-spacing: 2px;
@@ -59,8 +59,8 @@ st.markdown("""
     .dora-subtitle {
         text-align: center;
         color: #F9A825;
-        font-size: 0.9rem;
-        margin-bottom: 25px;
+        font-size: 0.8rem;
+        margin-bottom: 20px;
         font-weight: bold;
         letter-spacing: 3px;
         text-transform: uppercase;
@@ -70,9 +70,9 @@ st.markdown("""
     .stTextInput > div > div > input {
         border-radius: 25px;
         border: 2px solid #FFD600;
-        padding: 6px 12px;
-        font-size: 13px;
-        height: 38px;
+        padding: 5px 12px;
+        font-size: 12px;
+        height: 35px;
         background-color: rgba(255, 255, 255, 0.9);
     }
     
@@ -86,14 +86,14 @@ st.markdown("""
         background: linear-gradient(135deg, #2E7D32, #388E3C);
         color: white;
         border-radius: 25px;
-        padding: 8px 20px;
+        padding: 7px 18px;
         font-weight: bold;
-        font-size: 14px;
+        font-size: 13px;
         border: none;
         width: 100%;
         box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
         transition: all 0.3s ease;
-        height: 42px;
+        height: 38px;
     }
     
     .stButton > button:hover {
@@ -152,19 +152,6 @@ st.markdown("""
         font-size: 18px;
         font-weight: bold;
         color: #FFD600 !important;
-    }
-    
-    /* LOGO EN SIDEBAR */
-    .logo-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        min-height: 450px;
-        background-color: rgba(255, 255, 255, 0.8);
-        border-radius: 20px;
-        border: 2px solid #FFD600;
-        padding: 20px;
     }
     
     /* EXPANDER */
