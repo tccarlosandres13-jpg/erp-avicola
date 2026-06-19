@@ -1,5 +1,5 @@
 # ============================================
-# MÓDULO: LOGIN - Diseño profesional limpio
+# MÓDULO: LOGIN (Corregido - sin HTML visible)
 # ============================================
 
 import streamlit as st
@@ -8,7 +8,7 @@ from datetime import datetime
 
 def mostrar_login():
     
-    # Mensaje motivacional que cambia cada día
+    # Mensaje motivacional
     mensajes = [
         "✨ El éxito comienza con un huevo bien puesto.",
         "🐔 Cada día es una oportunidad para crecer.",
@@ -25,104 +25,51 @@ def mostrar_login():
     dia = datetime.now().day
     mensaje = mensajes[dia % len(mensajes)]
     
-    # ========== DOS COLUMNAS ==========
     col_izq, col_der = st.columns([1, 1])
     
-    # ========== COLUMNA IZQUIERDA ==========
+    # ========== COLUMNA IZQUIERDA: LOGO ==========
     with col_izq:
         logo = cargar_logo()
         if logo:
             st.image(logo, use_container_width=True)
         else:
-            st.markdown(
-                """
-                <div style="display: flex; justify-content: center; align-items: center; height: 80vh;">
-                    <span style="font-size: 200px;">🥚</span>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            st.markdown('<div style="text-align: center; font-size: 150px; padding: 50px;">🥚</div>', unsafe_allow_html=True)
     
-    # ========== COLUMNA DERECHA ==========
+    # ========== COLUMNA DERECHA: FORMULARIO ==========
     with col_der:
+        # TÍTULO
+        st.markdown("""
+            <div style="text-align: center; margin-bottom: 5px;">
+                <div style="font-size: 28px; font-weight: 900; color: #2E7D32; letter-spacing: 1px; text-transform: uppercase;">
+                    🥚 HUEVOS DOÑA DORA
+                </div>
+                <div style="font-size: 12px; color: #F9A825; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px;">
+                    Sistema de Gestión Avícola
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         
-        # TARJETA BLANCA
-        st.markdown(
-            """
+        # FRASE MOTIVACIONAL
+        st.markdown(f"""
             <div style="
-                background: white;
-                border-radius: 20px;
-                padding: 40px 35px 35px 35px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-                border: 1px solid #e8f5e9;
-                max-width: 420px;
-                margin: 0 auto;
+                background: #f0f7f0;
+                border-radius: 10px;
+                padding: 10px 15px;
+                margin: 15px 0 25px 0;
+                text-align: center;
+                border-left: 4px solid #2E7D32;
             ">
-                <!-- TÍTULO -->
-                <div style="text-align: center; margin-bottom: 8px;">
-                    <div style="
-                        font-size: 24px;
-                        font-weight: 900;
-                        color: #2E7D32;
-                        letter-spacing: 1px;
-                        text-transform: uppercase;
-                        font-family: 'Arial Black', sans-serif;
-                    ">
-                        🥚 HUEVOS DOÑA DORA
-                    </div>
-                    <div style="
-                        font-size: 11px;
-                        color: #F9A825;
-                        font-weight: bold;
-                        letter-spacing: 3px;
-                        text-transform: uppercase;
-                        margin-top: 2px;
-                    ">
-                        Sistema de Gestión Avícola
-                    </div>
-                </div>
-                
-                <!-- FRASE MOTIVACIONAL -->
-                <div style="
-                    background: #f0f7f0;
-                    border-radius: 10px;
-                    padding: 10px 15px;
-                    margin: 18px 0 25px 0;
-                    text-align: center;
-                    border-left: 4px solid #2E7D32;
-                ">
-                    <p style="
-                        font-size: 13px;
-                        color: #2E7D32;
-                        font-style: italic;
-                        margin: 0;
-                        font-weight: 500;
-                    ">
-                        💬 """ + mensaje + """
-                    </p>
-                </div>
-            """,
-            unsafe_allow_html=True
-        )
+                <p style="font-size: 14px; color: #2E7D32; font-style: italic; margin: 0; font-weight: 500;">
+                    💬 {mensaje}
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
         
         # FORMULARIO
-        usuario = st.text_input(
-            "USUARIO",
-            key="login_user",
-            placeholder="Ingrese su usuario",
-            label_visibility="collapsed"
-        )
+        usuario = st.text_input("", placeholder="👤 Ingrese su usuario", key="login_user")
+        password = st.text_input("", placeholder="🔒 Ingrese su contraseña", type="password", key="login_pass")
         
-        password = st.text_input(
-            "CONTRASEÑA",
-            type="password",
-            key="login_pass",
-            placeholder="Ingrese su contraseña",
-            label_visibility="collapsed"
-        )
-        
-        # BOTÓN
-        if st.button("INGRESAR", type="primary", use_container_width=True):
+        if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
             if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
                 st.session_state.logged_in = True
                 st.session_state.usuario = usuario
@@ -133,10 +80,5 @@ def mostrar_login():
         
         # CREDENCIALES
         with st.expander("📋 Credenciales de prueba"):
-            st.markdown("""
-            - **Administrador:** `admin` / `admin123`
-            - **Auxiliar:** `auxiliar` / `produccion123`
-            """)
-        
-        # CERRAR TARJETA
-        st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("- **Administrador:** `admin` / `admin123`")
+            st.markdown("- **Auxiliar:** `auxiliar` / `produccion123`")
