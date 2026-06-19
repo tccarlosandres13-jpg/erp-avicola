@@ -1,20 +1,29 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# VERSIÓN MODULAR COMPLETA
+# VERSIÓN MODULAR CON MENÚ PRINCIPAL PROFESIONAL
 # ============================================
 
 import streamlit as st
 from modulos.datos import usuarios, hash_password, cargar_logo
 from modulos.login import mostrar_login
-from modulos.dashboard import mostrar_dashboard
+from modulos.inicio import mostrar_inicio
 from modulos.produccion import mostrar_produccion
+from modulos.ventas import mostrar_ventas
 from modulos.inventario_huevos import mostrar_inventario_huevos
 from modulos.categorias import mostrar_categorias
 from modulos.reportes import mostrar_reportes
 from modulos.usuarios import mostrar_usuarios
 from modulos.configuracion import mostrar_configuracion
 
+# ============================================
+# CONFIGURACIÓN DE PÁGINA
+# ============================================
+
 st.set_page_config(page_title="Doña Dora - ERP", page_icon="🥚", layout="wide")
+
+# ============================================
+# CSS PERSONALIZADO
+# ============================================
 
 st.markdown("""
 <style>
@@ -29,23 +38,11 @@ st.markdown("""
         background: transparent !important;
     }
     
-    /* COLUMNAS 100% */
     .row-widget.stColumns {
-        height: 100vh !important;
-        min-height: 100vh !important;
-        max-height: 100vh !important;
         display: flex !important;
         align-items: stretch !important;
     }
     
-    .row-widget.stColumns > div {
-        height: 100vh !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* INPUTS */
     .stTextInput > div > div > input {
         border-radius: 12px !important;
         border: 2px solid #e0e0e0 !important;
@@ -63,7 +60,6 @@ st.markdown("""
         background-color: white !important;
     }
     
-    /* BOTÓN */
     .stButton > button {
         background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
         color: white !important;
@@ -86,7 +82,6 @@ st.markdown("""
         box-shadow: 0 8px 25px rgba(46, 125, 50, 0.35) !important;
     }
     
-    /* SIDEBAR */
     [data-testid="stSidebar"] {
         background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 100%) !important;
         border-right: 3px solid #FFD600 !important;
@@ -109,7 +104,6 @@ st.markdown("""
         color: #FFD600 !important;
     }
     
-    /* EXPANDER */
     .streamlit-expanderHeader {
         background: transparent !important;
         color: #2E7D32 !important;
@@ -124,50 +118,30 @@ st.markdown("""
     .streamlit-expanderHeader:hover {
         color: #F9A825 !important;
     }
-    
-    /* TARJETAS */
-    .summary-card {
-        background: white !important;
-        border-radius: 16px !important;
-        padding: 18px 20px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
-        border-left: 5px solid #2E7D32 !important;
-    }
-    
-    .summary-number {
-        font-size: 28px !important;
-        font-weight: 700 !important;
-        color: #2E7D32 !important;
-    }
-    
-    .summary-label {
-        font-size: 13px !important;
-        color: #777 !important;
-        font-weight: 500 !important;
-    }
-    
-    /* EXPANDER EN LOGIN */
-    .streamlit-expanderHeader {
-        justify-content: center !important;
-        font-size: 13px !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# LOGIN
+# INICIALIZAR ESTADOS
 # ============================================
 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.usuario = None
 
+if 'menu_seleccionado' not in st.session_state:
+    st.session_state.menu_seleccionado = None
+
+# ============================================
+# LOGIN
+# ============================================
+
 if not st.session_state.logged_in:
     mostrar_login()
     st.stop()
 
 # ============================================
-# MENÚ PRINCIPAL
+# MENÚ PRINCIPAL (Sidebar)
 # ============================================
 
 usuario_actual = st.session_state.usuario
@@ -181,44 +155,60 @@ else:
 
 st.sidebar.markdown('<p class="sidebar-title">HUEVOS DOÑA DORA</p>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
-st.sidebar.write(f"**Usuario:** {usuario_actual}")
-st.sidebar.write(f"**Rol:** {rol_actual}")
-st.sidebar.write("---")
+st.sidebar.write(f"**👤 Usuario:** {usuario_actual}")
+st.sidebar.write(f"**🎯 Rol:** {rol_actual}")
+st.sidebar.markdown("---")
 
-if rol_actual == "admin":
-    menu = st.sidebar.radio("📋 Menú Principal", [
-        "🏠 Dashboard",
-        "🐔 Producción",
-        "📦 Inventario Huevos",
-        "🏷️ Categorías",
-        "📊 Reportes",
-        "👥 Usuarios",
-        "⚙️ Configuración"
-    ])
-else:
-    menu = st.sidebar.radio("📋 Menú Principal", [
-        "🏠 Dashboard",
-        "🐔 Producción",
-        "📦 Inventario Huevos",
-        "📊 Reportes"
-    ])
+# Menú de navegación (side radio)
+opciones_menu = ["🏠 Inicio", "🐔 Producción", "💰 Ventas", "📦 Inventario Huevos", "🏷️ Categorías", "📊 Reportes", "👥 Usuarios", "⚙️ Configuración"]
+
+if rol_actual != "admin":
+    opciones_menu = ["🏠 Inicio", "🐔 Producción", "💰 Ventas", "📦 Inventario Huevos", "📊 Reportes"]
+
+menu = st.sidebar.radio("📋 Navegación", opciones_menu, index=0)
+
+# Mapeo de nombres a keys
+menu_keys = {
+    "🏠 Inicio": "inicio",
+    "🐔 Producción": "produccion",
+    "💰 Ventas": "ventas",
+    "📦 Inventario Huevos": "inventario",
+    "🏷️ Categorías": "categorias",
+    "📊 Reportes": "reportes",
+    "👥 Usuarios": "usuarios",
+    "⚙️ Configuración": "configuracion"
+}
 
 if st.sidebar.button("🚪 Cerrar Sesión"):
     st.session_state.logged_in = False
     st.session_state.usuario = None
     st.rerun()
 
-if menu == "🏠 Dashboard":
-    mostrar_dashboard()
-elif menu == "🐔 Producción":
+# ============================================
+# NAVEGACIÓN
+# ============================================
+
+# Prioridad: si viene de una tarjeta, usar esa selección
+if st.session_state.menu_seleccionado:
+    key = st.session_state.menu_seleccionado
+    st.session_state.menu_seleccionado = None
+else:
+    key = menu_keys.get(menu, "inicio")
+
+# Ejecutar módulo correspondiente
+if key == "inicio":
+    mostrar_inicio()
+elif key == "produccion":
     mostrar_produccion()
-elif menu == "📦 Inventario Huevos":
+elif key == "ventas":
+    mostrar_ventas()
+elif key == "inventario":
     mostrar_inventario_huevos()
-elif menu == "🏷️ Categorías":
+elif key == "categorias":
     mostrar_categorias()
-elif menu == "📊 Reportes":
+elif key == "reportes":
     mostrar_reportes()
-elif menu == "👥 Usuarios":
+elif key == "usuarios":
     mostrar_usuarios()
-elif menu == "⚙️ Configuración":
+elif key == "configuracion":
     mostrar_configuracion()
