@@ -14,22 +14,12 @@ from modulos.reportes import mostrar_reportes
 from modulos.usuarios import mostrar_usuarios
 from modulos.configuracion import mostrar_configuracion
 
-# ============================================
-# CONFIGURACIÓN DE PÁGINA
-# ============================================
-
 st.set_page_config(page_title="Doña Dora - ERP", page_icon="🥚", layout="wide")
-
-# ============================================
-# CSS PERSONALIZADO
-# ============================================
 
 st.markdown("""
 <style>
-    /* FONDO COMPLETO */
     html, body, .stApp {
         height: 100% !important;
-        width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         background: linear-gradient(135deg, #E8F5E9 0%, #FFF9C4 100%);
@@ -39,11 +29,7 @@ st.markdown("""
         background: transparent !important;
     }
     
-    .stApp > div {
-        height: 100% !important;
-    }
-    
-    /* COLUMNAS */
+    /* COLUMNAS AL 100% */
     .row-widget.stColumns {
         height: 100vh !important;
         min-height: 100vh !important;
@@ -59,26 +45,21 @@ st.markdown("""
         justify-content: center !important;
     }
     
-    /* CAMPOS - SIN ETIQUETA VISIBLE */
+    /* CAMPOS DE TEXTO */
     .stTextInput > div > div > input {
         border-radius: 12px !important;
-        border: 2px solid #E8E8E8 !important;
-        padding: 12px 16px !important;
+        border: 2px solid #E0E0E0 !important;
+        padding: 10px 16px !important;
         font-size: 14px !important;
         height: 48px !important;
         background-color: #F8F9FA !important;
         transition: all 0.3s ease !important;
-        margin-bottom: 12px !important;
     }
     
     .stTextInput > div > div > input:focus {
         border-color: #2E7D32 !important;
         box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08) !important;
         background-color: white !important;
-    }
-    
-    .stTextInput > div > label {
-        display: none !important;
     }
     
     /* BOTÓN */
@@ -95,43 +76,12 @@ st.markdown("""
         transition: all 0.3s ease !important;
         height: 48px !important;
         letter-spacing: 1px !important;
-        margin-top: 4px !important;
     }
     
     .stButton > button:hover {
         background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 8px 25px rgba(46, 125, 50, 0.35) !important;
-    }
-    
-    .stButton > button:active {
-        transform: translateY(0px) !important;
-    }
-    
-    .stButton > button[key*="back"] {
-        background: linear-gradient(135deg, #F9A825, #FFC107) !important;
-        color: #2E7D32 !important;
-    }
-    
-    .stButton > button[key*="back"]:hover {
-        background: linear-gradient(135deg, #E07B00, #F9A825) !important;
-        color: white !important;
-    }
-    
-    /* EXPANDER */
-    .streamlit-expanderHeader {
-        background: transparent !important;
-        color: #2E7D32 !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        border-bottom: 1px dashed #E0E0E0 !important;
-        border-radius: 0 !important;
-        padding: 8px 0 !important;
-        justify-content: center !important;
-    }
-    
-    .streamlit-expanderHeader:hover {
-        color: #F9A825 !important;
     }
     
     /* SIDEBAR */
@@ -150,41 +100,20 @@ st.markdown("""
         padding: 6px !important;
     }
     
-    [data-testid="stSidebar"] .stRadio > div:hover {
-        background: rgba(255, 255, 255, 0.1) !important;
-    }
-    
     .sidebar-title {
         text-align: center !important;
         font-size: 18px !important;
         font-weight: 700 !important;
         color: #FFD600 !important;
-        letter-spacing: 1px !important;
     }
     
-    /* MÉTRICAS */
-    [data-testid="stMetricValue"] {
-        color: #2E7D32 !important;
-        font-size: 2rem !important;
-    }
-    
-    [data-testid="stMetricLabel"] {
-        color: #555 !important;
-    }
-    
-    /* TARJETAS DE RESUMEN */
+    /* TARJETAS */
     .summary-card {
         background: white !important;
         border-radius: 16px !important;
         padding: 18px 20px !important;
         box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
         border-left: 5px solid #2E7D32 !important;
-        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-    }
-    
-    .summary-card:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.10) !important;
     }
     
     .summary-number {
@@ -199,20 +128,20 @@ st.markdown("""
         font-weight: 500 !important;
     }
     
-    /* ERRORES */
-    .stAlert {
-        border-radius: 12px !important;
-    }
-    
-    .stAlert > div {
+    /* EXPANDER */
+    .streamlit-expanderHeader {
+        background: transparent !important;
+        color: #2E7D32 !important;
         font-size: 13px !important;
+        font-weight: 600 !important;
+        border-bottom: 1px dashed #E0E0E0 !important;
+        border-radius: 0 !important;
+        padding: 8px 0 !important;
+        justify-content: center !important;
     }
     
-    /* DATAFRAME */
-    .stDataFrame {
-        border-radius: 12px !important;
-        overflow: hidden !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
+    .streamlit-expanderHeader:hover {
+        color: #F9A825 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -272,7 +201,7 @@ if st.sidebar.button("🚪 Cerrar Sesión"):
     st.rerun()
 
 # ============================================
-# NAVEGACIÓN ENTRE MÓDULOS
+# NAVEGACIÓN
 # ============================================
 
 if menu == "🏠 Dashboard":
