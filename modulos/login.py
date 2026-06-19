@@ -1,5 +1,5 @@
 # ============================================
-# MÓDULO: LOGIN (Corregido - sin HTML visible)
+# MÓDULO: LOGIN (Diseño moderno y vibrante)
 # ============================================
 
 import streamlit as st
@@ -8,7 +8,6 @@ from datetime import datetime
 
 def mostrar_login():
     
-    # Mensaje motivacional
     mensajes = [
         "✨ El éxito comienza con un huevo bien puesto.",
         "🐔 Cada día es una oportunidad para crecer.",
@@ -27,58 +26,100 @@ def mostrar_login():
     
     col_izq, col_der = st.columns([1, 1])
     
-    # ========== COLUMNA IZQUIERDA: LOGO ==========
     with col_izq:
         logo = cargar_logo()
         if logo:
             st.image(logo, use_container_width=True)
         else:
-            st.markdown('<div style="text-align: center; font-size: 150px; padding: 50px;">🥚</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 80vh;
+            ">
+                <span style="font-size: 200px; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.1));">🥚</span>
+            </div>
+            """, unsafe_allow_html=True)
     
-    # ========== COLUMNA DERECHA: FORMULARIO ==========
     with col_der:
-        # TÍTULO
         st.markdown("""
-            <div style="text-align: center; margin-bottom: 5px;">
-                <div style="font-size: 28px; font-weight: 900; color: #2E7D32; letter-spacing: 1px; text-transform: uppercase;">
+        <div style="
+            background: white;
+            border-radius: 24px;
+            padding: 45px 40px 35px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+            border: 1px solid rgba(46, 125, 50, 0.08);
+            max-width: 420px;
+            margin: 0 auto;
+        ">
+            <div style="text-align: center; margin-bottom: 8px;">
+                <div style="
+                    font-size: 30px;
+                    font-weight: 900;
+                    color: #2E7D32;
+                    letter-spacing: 2px;
+                    text-transform: uppercase;
+                    font-family: 'Arial Black', sans-serif;
+                    text-shadow: 0 2px 10px rgba(46,125,50,0.1);
+                ">
                     🥚 HUEVOS DOÑA DORA
                 </div>
-                <div style="font-size: 12px; color: #F9A825; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px;">
+                <div style="
+                    font-size: 13px;
+                    color: #F9A825;
+                    font-weight: 700;
+                    letter-spacing: 5px;
+                    text-transform: uppercase;
+                    margin-top: 4px;
+                ">
                     Sistema de Gestión Avícola
                 </div>
             </div>
-        """, unsafe_allow_html=True)
-        
-        # FRASE MOTIVACIONAL
-        st.markdown(f"""
+            
             <div style="
-                background: #f0f7f0;
-                border-radius: 10px;
-                padding: 10px 15px;
-                margin: 15px 0 25px 0;
+                background: linear-gradient(135deg, #e8f5e9, #fff9c4);
+                border-radius: 12px;
+                padding: 12px 18px;
+                margin: 20px 0 25px 0;
                 text-align: center;
                 border-left: 4px solid #2E7D32;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             ">
-                <p style="font-size: 14px; color: #2E7D32; font-style: italic; margin: 0; font-weight: 500;">
-                    💬 {mensaje}
+                <p style="
+                    font-size: 14px;
+                    color: #2E7D32;
+                    font-style: italic;
+                    margin: 0;
+                    font-weight: 500;
+                ">
+                    💬 """ + mensaje + """
                 </p>
             </div>
         """, unsafe_allow_html=True)
         
-        # FORMULARIO
+        # Campos con estilo moderno
         usuario = st.text_input("", placeholder="👤 Ingrese su usuario", key="login_user")
         password = st.text_input("", placeholder="🔒 Ingrese su contraseña", type="password", key="login_pass")
         
-        if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
-            if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
-                st.session_state.logged_in = True
-                st.session_state.usuario = usuario
-                st.session_state.rol = usuarios[usuario]["rol"]
-                st.rerun()
-            else:
-                st.error("❌ Usuario o contraseña incorrectos")
+        # Botón con efecto brillante
+        col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
+        with col_btn2:
+            if st.button("🚪 INGRESAR", type="primary", use_container_width=True):
+                if usuario in usuarios and usuarios[usuario]["password"] == hash_password(password):
+                    st.session_state.logged_in = True
+                    st.session_state.usuario = usuario
+                    st.session_state.rol = usuarios[usuario]["rol"]
+                    st.rerun()
+                else:
+                    st.error("❌ Usuario o contraseña incorrectos")
         
-        # CREDENCIALES
         with st.expander("📋 Credenciales de prueba"):
-            st.markdown("- **Administrador:** `admin` / `admin123`")
-            st.markdown("- **Auxiliar:** `auxiliar` / `produccion123`")
+            st.markdown("""
+            <div style="font-size: 14px;">
+                - **Administrador:** `admin` / `admin123`<br>
+                - **Auxiliar:** `auxiliar` / `produccion123`
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
