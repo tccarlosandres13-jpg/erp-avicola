@@ -21,12 +21,12 @@ from modulos.configuracion import mostrar_configuracion
 st.set_page_config(page_title="Doña Dora - ERP", page_icon="🥚", layout="wide")
 
 # ============================================
-# CSS PERSONALIZADO
+# CSS PERSONALIZADO - DISEÑO PROFESIONAL
 # ============================================
 
 st.markdown("""
 <style>
-    /* FONDO AL 100% DE LA PANTALLA */
+    /* FONDO Y PANTALLA COMPLETA */
     html, body, .stApp {
         height: 100% !important;
         width: 100% !important;
@@ -59,147 +59,163 @@ st.markdown("""
         justify-content: center !important;
     }
     
-    /* TARJETA DE LOGIN - SIN CUADRO BLANCO GRANDE ARRIBA */
-    .login-card {
-        background-color: rgba(255, 255, 255, 0.92);
-        border-radius: 20px;
-        padding: 30px 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        border: 2px solid #FFD600;
-        width: 100%;
-        max-width: 480px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    /* TÍTULO CON ESTILO GEO */
-    .dora-title-geo {
-        text-align: center;
-        color: #2E7D32;
-        font-size: 1.8rem;
-        font-weight: 900;
-        margin-bottom: 5px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        font-family: 'Arial Black', 'Impact', sans-serif;
-        text-shadow: 2px 2px 0px rgba(249, 168, 37, 0.3);
-    }
-    
-    .dora-subtitle {
-        text-align: center;
-        color: #F9A825;
-        font-size: 0.85rem;
-        margin-bottom: 25px;
-        font-weight: bold;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-    }
-    
-    /* CAMPOS DE TEXTO MÁS PEQUEÑOS */
+    /* CAMPOS DE TEXTO PROFESIONALES */
     .stTextInput > div > div > input {
-        border-radius: 25px;
-        border: 2px solid #FFD600;
-        padding: 6px 14px;
-        font-size: 13px;
-        height: 38px;
-        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 12px !important;
+        border: 2px solid #E0E0E0 !important;
+        padding: 10px 16px !important;
+        font-size: 14px !important;
+        height: 48px !important;
+        background-color: #F8F9FA !important;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #2E7D32;
-        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+        border-color: #2E7D32 !important;
+        box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1) !important;
+        background-color: white !important;
     }
     
-    /* BOTONES */
+    .stTextInput > div > label {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #2E7D32 !important;
+        letter-spacing: 1px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    /* BOTÓN PROFESIONAL */
     .stButton > button {
-        background: linear-gradient(135deg, #2E7D32, #388E3C);
-        color: white;
-        border-radius: 25px;
-        padding: 8px 20px;
-        font-weight: bold;
-        font-size: 14px;
-        border: none;
-        width: 100%;
-        box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
-        transition: all 0.3s ease;
-        height: 42px;
+        background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
+        color: white !important;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
+        border: none !important;
+        width: 100% !important;
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3) !important;
+        transition: all 0.3s ease !important;
+        height: 48px !important;
+        letter-spacing: 1px !important;
     }
     
     .stButton > button:hover {
-        background: linear-gradient(135deg, #F9A825, #FFC107);
-        color: #2E7D32;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(249, 168, 37, 0.4);
+        background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4) !important;
     }
     
+    .stButton > button:active {
+        transform: translateY(0px) !important;
+    }
+    
+    /* BOTÓN REGRESAR */
     .stButton > button[key*="back"] {
-        background: linear-gradient(135deg, #F9A825, #FFC107);
-        color: #2E7D32;
+        background: linear-gradient(135deg, #F9A825, #FFC107) !important;
+        color: #2E7D32 !important;
     }
     
     .stButton > button[key*="back"]:hover {
-        background: linear-gradient(135deg, #E07B00, #F9A825);
-        color: white;
+        background: linear-gradient(135deg, #E07B00, #F9A825) !important;
+        color: white !important;
     }
     
-    /* MÉTRICAS */
-    [data-testid="stMetricValue"] {
-        color: #2E7D32;
+    /* EXPANDER */
+    .streamlit-expanderHeader {
+        background: transparent !important;
+        color: #2E7D32 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        border-bottom: 1px dashed #E0E0E0 !important;
+        border-radius: 0 !important;
+        padding: 8px 0 !important;
     }
     
-    .summary-card {
-        background-color: white;
-        border-radius: 15px;
-        padding: 15px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        border-left: 5px solid #2E7D32;
-    }
-    
-    .summary-number {
-        font-size: 24px;
-        font-weight: bold;
-        color: #2E7D32;
-    }
-    
-    .summary-label {
-        font-size: 12px;
-        color: #666;
+    .streamlit-expanderHeader:hover {
+        color: #F9A825 !important;
     }
     
     /* SIDEBAR */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #2E7D32 0%, #1B5E20 100%);
+        background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 100%) !important;
+        border-right: 3px solid #FFD600 !important;
     }
     
     [data-testid="stSidebar"] * {
         color: white !important;
     }
     
+    [data-testid="stSidebar"] .stRadio > div {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-radius: 12px !important;
+        padding: 6px !important;
+    }
+    
+    [data-testid="stSidebar"] .stRadio > div:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
     .sidebar-title {
-        text-align: center;
-        font-size: 18px;
-        font-weight: bold;
+        text-align: center !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
         color: #FFD600 !important;
+        letter-spacing: 1px !important;
     }
     
-    /* EXPANDER */
-    .streamlit-expanderHeader {
-        background-color: rgba(46, 125, 50, 0.05);
-        border-radius: 12px;
-        font-weight: 600;
-        color: #2E7D32;
-        font-size: 13px;
+    /* MÉTRICAS */
+    [data-testid="stMetricValue"] {
+        color: #2E7D32 !important;
+        font-size: 2rem !important;
     }
     
-    /* FONDO DEL LOGO - TRANSPARENTE */
-    .logo-container {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
+    [data-testid="stMetricLabel"] {
+        color: #555 !important;
+    }
+    
+    /* TARJETAS DE RESUMEN */
+    .summary-card {
+        background: white !important;
+        border-radius: 16px !important;
+        padding: 18px 20px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+        border-left: 5px solid #2E7D32 !important;
+        transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.10) !important;
+    }
+    
+    .summary-number {
+        font-size: 28px !important;
+        font-weight: 700 !important;
+        color: #2E7D32 !important;
+    }
+    
+    .summary-label {
+        font-size: 13px !important;
+        color: #777 !important;
+        font-weight: 500 !important;
+    }
+    
+    /* ERRORES Y MENSAJES */
+    .stAlert {
+        border-radius: 12px !important;
+        border-left: 4px solid #D32F2F !important;
+    }
+    
+    .stAlert > div {
+        font-size: 13px !important;
+    }
+    
+    /* DATAFRAME */
+    .stDataFrame {
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04) !important;
     }
 </style>
 """, unsafe_allow_html=True)
