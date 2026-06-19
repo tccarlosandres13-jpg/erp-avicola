@@ -1,10 +1,12 @@
 # ============================================
-# MÓDULO: LOGIN (Logo izquierda, formulario derecha)
+# MÓDULO: LOGIN (Logo izquierda - formulario + mensaje derecha)
 # ============================================
 
 import streamlit as st
 from modulos.datos import usuarios, hash_password, cargar_logo
 from datetime import datetime
+import io
+import base64
 
 def mostrar_login():
     
@@ -32,26 +34,32 @@ def mostrar_login():
     with col_izq:
         logo = cargar_logo()
         if logo:
-            # Usar contenedor con altura completa
+            # Convertir logo a base64 para mostrarlo con altura completa
+            buffered = io.BytesIO()
+            if logo.mode == 'RGBA':
+                logo = logo.convert('RGB')
+            logo.save(buffered, format="JPEG", quality=85)
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+            
             st.markdown(
                 f"""
                 <div style="
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    height: 100%;
-                    min-height: 520px;
-                    background: rgba(255,255,255,0.9);
+                    height: 100vh;
+                    min-height: 550px;
+                    max-height: 600px;
+                    background: rgba(255,255,255,0.95);
                     border-radius: 20px;
                     border: 2px solid #FFD600;
-                    padding: 10px;
+                    padding: 5px;
                     overflow: hidden;
                 ">
-                    <img src="data:image/jpeg;base64,{logo_para_html(logo)}" 
+                    <img src="data:image/jpeg;base64,{img_str}" 
                          style="
                              width: 100%;
                              height: 100%;
-                             max-height: 500px;
                              object-fit: contain;
                          ">
                 </div>
@@ -61,21 +69,23 @@ def mostrar_login():
         else:
             st.markdown(
                 """
-                <div style="display: flex; justify-content: center; align-items: center; height: 100%; min-height: 520px; background: white; border-radius: 20px; border: 2px solid #FFD600; padding: 20px;">
-                    <span style="font-size: 180px;">🥚</span>
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; min-height: 550px; max-height: 600px; background: white; border-radius: 20px; border: 2px solid #FFD600; padding: 20px;">
+                    <span style="font-size: 150px;">🥚</span>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
-            st.info("💡 Sube el archivo 'logo.jpeg' o 'logo.jpg' a la raíz del repositorio para ver el logo real")
+            st.info("💡 Sube el archivo 'logo.jpeg' o 'logo.jpg' a la raíz del repositorio")
     
-    # ========== COLUMNA DERECHA: FORMULARIO ==========
+    # ========== COLUMNA DERECHA: TÍTULO + FORMULARIO + MENSAJE ==========
     with col_der:
+        # TARJETA PRINCIPAL
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         
         st.markdown('<h1 class="dora-title-geo">🥚 HUEVOS DOÑA DORA</h1>', unsafe_allow_html=True)
         st.markdown('<p class="dora-subtitle">Sistema de Gestión Avícola</p>', unsafe_allow_html=True)
         
+        # FORMULARIO
         with st.container():
             col_campo1, col_campo2, col_campo3 = st.columns([1, 2, 1])
             with col_campo2:
@@ -91,52 +101,34 @@ def mostrar_login():
                     else:
                         st.error("❌ Usuario o contraseña incorrectos")
         
-        # ========== MENSAJE MOTIVACIONAL DENTRO DE CUADRO BLANCO PEQUEÑO ==========
-        st.markdown("---")
-        st.markdown(f"""
+        # ========== CUADRO BLANCO PEQUEÑO CON MENSAJE MOTIVACIONAL ==========
+        st.markdown("""
         <div style="
             background: white;
-            border-radius: 12px;
-            padding: 8px 15px;
-            margin: 5px 0 15px 0;
-            border-left: 4px solid #2E7D32;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-radius: 15px;
+            padding: 12px 20px;
+            margin: 15px auto 10px auto;
+            border: 2px solid #FFD600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
             text-align: center;
-            max-width: 80%;
-            margin-left: auto;
-            margin-right: auto;
+            max-width: 85%;
         ">
             <p style="
-                font-size: 13px;
+                font-size: 14px;
                 color: #2E7D32;
                 font-style: italic;
                 margin: 0;
                 font-weight: 500;
+                line-height: 1.5;
             ">
                 💬 {mensaje}
             </p>
         </div>
-        """, unsafe_allow_html=True)
+        """.format(mensaje=mensaje), unsafe_allow_html=True)
         
+        # CREDENCIALES
         with st.expander("📋 Credenciales de prueba"):
             st.markdown("- **Administrador:** `admin` / `admin123`")
             st.markdown("- **Auxiliar:** `auxiliar` / `produccion123`")
         
         st.markdown('</div>', unsafe_allow_html=True)
-
-# ============================================
-# FUNCIÓN PARA CONVERTIR LOGO A BASE64
-# ============================================
-
-def logo_para_html(logo):
-    import io
-    import base64
-    from PIL import Image
-    
-    # Convertir la imagen a bytes
-    buffered = io.BytesIO()
-    if logo.mode == 'RGBA':
-        logo = logo.convert('RGB')
-    logo.save(buffered, format="JPEG", quality=85)
-    img_str = base64.b64encode(buffered.getvalue()).decode()
-    return img_str
