@@ -21,12 +21,12 @@ from modulos.configuracion import mostrar_configuracion
 st.set_page_config(page_title="Doña Dora - ERP", page_icon="🥚", layout="wide")
 
 # ============================================
-# CSS PERSONALIZADO - DISEÑO PROFESIONAL
+# CSS PERSONALIZADO
 # ============================================
 
 st.markdown("""
 <style>
-    /* FONDO Y PANTALLA COMPLETA */
+    /* FONDO COMPLETO */
     html, body, .stApp {
         height: 100% !important;
         width: 100% !important;
@@ -43,7 +43,7 @@ st.markdown("""
         height: 100% !important;
     }
     
-    /* COLUMNAS AL 100% */
+    /* COLUMNAS */
     .row-widget.stColumns {
         height: 100vh !important;
         min-height: 100vh !important;
@@ -59,32 +59,29 @@ st.markdown("""
         justify-content: center !important;
     }
     
-    /* CAMPOS DE TEXTO PROFESIONALES */
+    /* CAMPOS - SIN ETIQUETA VISIBLE */
     .stTextInput > div > div > input {
         border-radius: 12px !important;
-        border: 2px solid #E0E0E0 !important;
-        padding: 10px 16px !important;
+        border: 2px solid #E8E8E8 !important;
+        padding: 12px 16px !important;
         font-size: 14px !important;
         height: 48px !important;
         background-color: #F8F9FA !important;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+        transition: all 0.3s ease !important;
+        margin-bottom: 12px !important;
     }
     
     .stTextInput > div > div > input:focus {
         border-color: #2E7D32 !important;
-        box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1) !important;
+        box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08) !important;
         background-color: white !important;
     }
     
     .stTextInput > div > label {
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        color: #2E7D32 !important;
-        letter-spacing: 1px !important;
-        margin-bottom: 4px !important;
+        display: none !important;
     }
     
-    /* BOTÓN PROFESIONAL */
+    /* BOTÓN */
     .stButton > button {
         background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
         color: white !important;
@@ -94,23 +91,23 @@ st.markdown("""
         font-size: 15px !important;
         border: none !important;
         width: 100% !important;
-        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3) !important;
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25) !important;
         transition: all 0.3s ease !important;
         height: 48px !important;
         letter-spacing: 1px !important;
+        margin-top: 4px !important;
     }
     
     .stButton > button:hover {
         background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4) !important;
+        box-shadow: 0 8px 25px rgba(46, 125, 50, 0.35) !important;
     }
     
     .stButton > button:active {
         transform: translateY(0px) !important;
     }
     
-    /* BOTÓN REGRESAR */
     .stButton > button[key*="back"] {
         background: linear-gradient(135deg, #F9A825, #FFC107) !important;
         color: #2E7D32 !important;
@@ -130,6 +127,7 @@ st.markdown("""
         border-bottom: 1px dashed #E0E0E0 !important;
         border-radius: 0 !important;
         padding: 8px 0 !important;
+        justify-content: center !important;
     }
     
     .streamlit-expanderHeader:hover {
@@ -201,10 +199,9 @@ st.markdown("""
         font-weight: 500 !important;
     }
     
-    /* ERRORES Y MENSAJES */
+    /* ERRORES */
     .stAlert {
         border-radius: 12px !important;
-        border-left: 4px solid #D32F2F !important;
     }
     
     .stAlert > div {
