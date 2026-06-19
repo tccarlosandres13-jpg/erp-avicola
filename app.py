@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# VERSIÓN MODULAR CON MENÚ PRINCIPAL PROFESIONAL
+# VERSIÓN COMPLETA CORREGIDA
 # ============================================
 
 import streamlit as st
@@ -15,15 +15,7 @@ from modulos.reportes import mostrar_reportes
 from modulos.usuarios import mostrar_usuarios
 from modulos.configuracion import mostrar_configuracion
 
-# ============================================
-# CONFIGURACIÓN DE PÁGINA
-# ============================================
-
 st.set_page_config(page_title="Doña Dora - ERP", page_icon="🥚", layout="wide")
-
-# ============================================
-# CSS PERSONALIZADO
-# ============================================
 
 st.markdown("""
 <style>
@@ -121,10 +113,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ============================================
-# INICIALIZAR ESTADOS
-# ============================================
-
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.usuario = None
@@ -132,17 +120,9 @@ if 'logged_in' not in st.session_state:
 if 'menu_seleccionado' not in st.session_state:
     st.session_state.menu_seleccionado = None
 
-# ============================================
-# LOGIN
-# ============================================
-
 if not st.session_state.logged_in:
     mostrar_login()
     st.stop()
-
-# ============================================
-# MENÚ PRINCIPAL (Sidebar)
-# ============================================
 
 usuario_actual = st.session_state.usuario
 rol_actual = st.session_state.rol
@@ -159,7 +139,6 @@ st.sidebar.write(f"**👤 Usuario:** {usuario_actual}")
 st.sidebar.write(f"**🎯 Rol:** {rol_actual}")
 st.sidebar.markdown("---")
 
-# Menú de navegación (side radio)
 opciones_menu = ["🏠 Inicio", "🐔 Producción", "💰 Ventas", "📦 Inventario Huevos", "🏷️ Categorías", "📊 Reportes", "👥 Usuarios", "⚙️ Configuración"]
 
 if rol_actual != "admin":
@@ -167,7 +146,6 @@ if rol_actual != "admin":
 
 menu = st.sidebar.radio("📋 Navegación", opciones_menu, index=0)
 
-# Mapeo de nombres a keys
 menu_keys = {
     "🏠 Inicio": "inicio",
     "🐔 Producción": "produccion",
@@ -184,18 +162,12 @@ if st.sidebar.button("🚪 Cerrar Sesión"):
     st.session_state.usuario = None
     st.rerun()
 
-# ============================================
-# NAVEGACIÓN
-# ============================================
-
-# Prioridad: si viene de una tarjeta, usar esa selección
 if st.session_state.menu_seleccionado:
     key = st.session_state.menu_seleccionado
     st.session_state.menu_seleccionado = None
 else:
     key = menu_keys.get(menu, "inicio")
 
-# Ejecutar módulo correspondiente
 if key == "inicio":
     mostrar_inicio()
 elif key == "produccion":
