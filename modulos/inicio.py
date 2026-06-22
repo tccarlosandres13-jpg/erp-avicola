@@ -1,5 +1,5 @@
 # ============================================
-# MÓDULO: INICIO (SIN BOTONES EN EL CENTRO)
+# MÓDULO: INICIO (Con mejor contraste)
 # ============================================
 
 import streamlit as st
@@ -11,24 +11,24 @@ def mostrar_inicio():
     # Banner superior
     st.markdown("""
     <div style="
-        background: linear-gradient(135deg, rgba(255,214,0,0.12), rgba(255,214,0,0.02));
+        background: linear-gradient(135deg, rgba(255,214,0,0.10), rgba(255,214,0,0.02));
         border-radius: 24px;
-        padding: 30px 35px;
+        padding: 32px 38px;
         margin-bottom: 28px;
-        border: 1px solid rgba(255,214,0,0.08);
+        border: 1px solid rgba(255,214,0,0.06);
         box-shadow: 0 10px 50px rgba(0,0,0,0.3);
     ">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
             <div>
-                <div style="font-size:34px;font-weight:900;color:#FFD600;letter-spacing:2px;">
+                <div style="font-size:36px;font-weight:900;color:#FFD600;letter-spacing:2px;text-shadow:0 0 60px rgba(255,214,0,0.05);">
                     🚀 Doña Dora ERP
                 </div>
-                <div style="font-size:15px;color:rgba(255,255,255,0.5);margin-top:4px;letter-spacing:1px;">
+                <div style="font-size:16px;color:rgba(255,255,255,0.4);margin-top:6px;letter-spacing:1px;font-weight:400;">
                     🌟 Sistema de Gestión Avícola - La calidad es nuestro sello
                 </div>
             </div>
-            <div style="background:rgba(255,214,0,0.06);padding:10px 22px;border-radius:14px;border:1px solid rgba(255,214,0,0.08);">
-                <span style="color:#FFD600;font-weight:700;font-size:15px;letter-spacing:1px;">
+            <div style="background:rgba(255,214,0,0.06);padding:12px 24px;border-radius:14px;border:1px solid rgba(255,214,0,0.08);">
+                <span style="color:#FFD600;font-weight:700;font-size:16px;letter-spacing:1px;">
                     📅 """ + datetime.now().strftime("%d/%m/%Y") + """
                 </span>
             </div>
@@ -47,14 +47,14 @@ def mostrar_inicio():
     
     with col1:
         st.markdown(f"""
-        <div style="background:rgba(255,255,255,0.03);border-radius:18px;padding:22px 24px;border:1px solid rgba(255,255,255,0.05);">
+        <div style="background:rgba(255,255,255,0.04);border-radius:18px;padding:24px 26px;border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:600;letter-spacing:2px;text-transform:uppercase;">Producción Hoy</div>
-                    <div style="font-size:36px;font-weight:800;color:#FFD600;margin-top:2px;">{total_hoy:,}</div>
-                    <div style="font-size:12px;color:rgba(255,255,255,0.25);">🥚 huevos</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:2px;text-transform:uppercase;">Producción Hoy</div>
+                    <div style="font-size:38px;font-weight:800;color:#FFD600;margin-top:2px;">{total_hoy:,}</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.25);">🥚 huevos</div>
                 </div>
-                <div style="background:rgba(255,214,0,0.08);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:30px;border:1px solid rgba(255,214,0,0.08);">
+                <div style="background:rgba(255,214,0,0.08);border-radius:50%;width:65px;height:65px;display:flex;align-items:center;justify-content:center;font-size:32px;border:1px solid rgba(255,214,0,0.08);">
                     🥚
                 </div>
             </div>
@@ -63,14 +63,14 @@ def mostrar_inicio():
     
     with col2:
         st.markdown(f"""
-        <div style="background:rgba(255,255,255,0.03);border-radius:18px;padding:22px 24px;border:1px solid rgba(255,255,255,0.05);">
+        <div style="background:rgba(255,255,255,0.04);border-radius:18px;padding:24px 26px;border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:600;letter-spacing:2px;text-transform:uppercase;">Inventario</div>
-                    <div style="font-size:36px;font-weight:800;color:#FFD600;margin-top:2px;">{total_inventario:,}</div>
-                    <div style="font-size:12px;color:rgba(255,255,255,0.25);">📦 huevos</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:2px;text-transform:uppercase;">Inventario</div>
+                    <div style="font-size:38px;font-weight:800;color:#FFD600;margin-top:2px;">{total_inventario:,}</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.25);">📦 huevos</div>
                 </div>
-                <div style="background:rgba(255,214,0,0.08);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:30px;border:1px solid rgba(255,214,0,0.08);">
+                <div style="background:rgba(255,214,0,0.08);border-radius:50%;width:65px;height:65px;display:flex;align-items:center;justify-content:center;font-size:32px;border:1px solid rgba(255,214,0,0.08);">
                     📦
                 </div>
             </div>
@@ -79,14 +79,14 @@ def mostrar_inicio():
     
     with col3:
         st.markdown(f"""
-        <div style="background:rgba(255,255,255,0.03);border-radius:18px;padding:22px 24px;border:1px solid rgba(255,255,255,0.05);">
+        <div style="background:rgba(255,255,255,0.04);border-radius:18px;padding:24px 26px;border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                    <div style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:600;letter-spacing:2px;text-transform:uppercase;">Gallinas</div>
-                    <div style="font-size:36px;font-weight:800;color:#FFD600;margin-top:2px;">{total_gallinas:,}</div>
-                    <div style="font-size:12px;color:rgba(255,255,255,0.25);">🐔 aves</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.3);font-weight:600;letter-spacing:2px;text-transform:uppercase;">Gallinas</div>
+                    <div style="font-size:38px;font-weight:800;color:#FFD600;margin-top:2px;">{total_gallinas:,}</div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.25);">🐔 aves</div>
                 </div>
-                <div style="background:rgba(255,214,0,0.08);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:30px;border:1px solid rgba(255,214,0,0.08);">
+                <div style="background:rgba(255,214,0,0.08);border-radius:50%;width:65px;height:65px;display:flex;align-items:center;justify-content:center;font-size:32px;border:1px solid rgba(255,214,0,0.08);">
                     🐔
                 </div>
             </div>
@@ -95,13 +95,13 @@ def mostrar_inicio():
     
     st.markdown("---")
     
-    # ========== TÍTULO DE MÓDULOS (SOLO INFORMATIVO) ==========
+    # ========== MENSAJE PARA USAR MENÚ LATERAL ==========
     st.markdown("""
-    <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:20px;font-weight:700;color:rgba(255,255,255,0.2);letter-spacing:3px;text-transform:uppercase;">
+    <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:18px;font-weight:600;color:rgba(255,255,255,0.2);letter-spacing:3px;text-transform:uppercase;">
             📋 Utiliza el menú lateral para navegar
         </div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.15);margin-top:2px;letter-spacing:2px;">
+        <div style="font-size:13px;color:rgba(255,255,255,0.12);margin-top:4px;letter-spacing:2px;">
             SELECCIONA UN MÓDULO EN EL PANEL IZQUIERDO
         </div>
     </div>
@@ -111,8 +111,8 @@ def mostrar_inicio():
     
     # ========== ÚLTIMAS PRODUCCIONES ==========
     st.markdown("""
-    <div style="background:rgba(255,255,255,0.02);border-radius:18px;padding:20px 26px;border:1px solid rgba(255,255,255,0.04);">
-        <div style="font-size:17px;font-weight:700;color:#FFD600;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+    <div style="background:rgba(255,255,255,0.02);border-radius:18px;padding:22px 28px;border:1px solid rgba(255,255,255,0.04);">
+        <div style="font-size:18px;font-weight:700;color:#FFD600;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
             📈 Últimas producciones
         </div>
     """, unsafe_allow_html=True)
@@ -122,7 +122,7 @@ def mostrar_inicio():
         for p in ultimas:
             galpon_nombre = next((g["nombre"] for g in galpones if g["id"] == p["galpon_id"]), "Desconocido")
             st.markdown(f"""
-            <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:10px 16px;margin-bottom:4px;border-left:3px solid #FFD600;">
+            <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:12px 18px;margin-bottom:6px;border-left:3px solid #FFD600;">
                 <span style="font-weight:600;color:#FFD600;">{p['fecha']}</span>
                 <span style="color:rgba(255,255,255,0.4);"> - {galpon_nombre}:</span>
                 <span style="font-weight:600;color:#FFD600;">{p['total_huevos']:,}</span>
