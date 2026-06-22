@@ -1,6 +1,6 @@
 # ============================================
 # ERP AVICOLA - HUEVOS DOÑA DORA
-# VERSIÓN MODERNA Y PROFESIONAL
+# VERSIÓN PREMIUM
 # ============================================
 
 import streamlit as st
@@ -23,7 +23,7 @@ st.markdown("""
         height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: linear-gradient(135deg, #f0f7f0 0%, #fff9e6 100%);
+        background: linear-gradient(135deg, #0a1a0a 0%, #1a3a1a 40%, #2d5a2d 100%) !important;
     }
     
     .stApp > header {
@@ -35,48 +35,9 @@ st.markdown("""
         align-items: stretch !important;
     }
     
-    .stTextInput > div > div > input {
-        border-radius: 14px !important;
-        border: 2px solid #e8e8e8 !important;
-        padding: 12px 18px !important;
-        font-size: 14px !important;
-        height: 50px !important;
-        background-color: #f8f9fa !important;
-        margin-bottom: 14px !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stTextInput > div > div > input:focus {
-        border-color: #2E7D32 !important;
-        box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.08) !important;
-        background-color: white !important;
-    }
-    
-    .stButton > button {
-        background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
-        color: white !important;
-        border-radius: 14px !important;
-        padding: 12px 24px !important;
-        font-weight: 700 !important;
-        font-size: 15px !important;
-        border: none !important;
-        width: 100% !important;
-        box-shadow: 0 4px 20px rgba(46, 125, 50, 0.25) !important;
-        transition: all 0.3s ease !important;
-        height: 50px !important;
-        letter-spacing: 1px !important;
-        margin-top: 4px !important;
-    }
-    
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
-        transform: translateY(-3px) !important;
-        box-shadow: 0 8px 30px rgba(46, 125, 50, 0.35) !important;
-    }
-    
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1B5E20 0%, #2E7D32 100%) !important;
-        border-right: 3px solid #FFD600 !important;
+        background: linear-gradient(180deg, #0a1a0a 0%, #1a3a1a 100%) !important;
+        border-right: 2px solid rgba(255,214,0,0.08) !important;
     }
     
     [data-testid="stSidebar"] * {
@@ -84,7 +45,7 @@ st.markdown("""
     }
     
     [data-testid="stSidebar"] .stRadio > div {
-        background: rgba(255, 255, 255, 0.05) !important;
+        background: rgba(255,255,255,0.03) !important;
         border-radius: 12px !important;
         padding: 6px !important;
     }
@@ -94,22 +55,29 @@ st.markdown("""
         font-size: 18px !important;
         font-weight: 700 !important;
         color: #FFD600 !important;
-        letter-spacing: 1px !important;
+        letter-spacing: 2px !important;
     }
     
     .streamlit-expanderHeader {
         background: transparent !important;
-        color: #2E7D32 !important;
+        color: rgba(255,255,255,0.6) !important;
         font-size: 13px !important;
         font-weight: 600 !important;
-        border-bottom: 1px dashed #e0e0e0 !important;
+        border-bottom: 1px solid rgba(255,255,255,0.05) !important;
         border-radius: 0 !important;
         padding: 8px 0 !important;
         justify-content: center !important;
     }
     
     .streamlit-expanderHeader:hover {
-        color: #F9A825 !important;
+        color: #FFD600 !important;
+    }
+    
+    .stAlert {
+        background: rgba(255,255,255,0.03) !important;
+        border-radius: 16px !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        color: rgba(255,255,255,0.7) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -132,7 +100,7 @@ logo = cargar_logo()
 if logo:
     st.sidebar.image(logo, width=80)
 else:
-    st.sidebar.markdown('<p style="font-size: 40px; text-align: center;">🥚</p>', unsafe_allow_html=True)
+    st.sidebar.markdown('<p style="font-size:40px;text-align:center;">🥚</p>', unsafe_allow_html=True)
 
 st.sidebar.markdown('<p class="sidebar-title">HUEVOS DOÑA DORA</p>', unsafe_allow_html=True)
 st.sidebar.markdown("---")
