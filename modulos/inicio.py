@@ -1,5 +1,5 @@
 # ============================================
-# MÓDULO: INICIO (Corregido)
+# MÓDULO: INICIO (SIN BOTONES EN EL CENTRO)
 # ============================================
 
 import streamlit as st
@@ -8,7 +8,7 @@ from modulos.datos import produccion, inventario_huevos, inventario_gallinas, ga
 
 def mostrar_inicio():
     
-    # Banner
+    # Banner superior
     st.markdown("""
     <div style="
         background: linear-gradient(135deg, rgba(255,214,0,0.12), rgba(255,214,0,0.02));
@@ -36,7 +36,7 @@ def mostrar_inicio():
     </div>
     """, unsafe_allow_html=True)
     
-    # Estadísticas
+    # ========== ESTADÍSTICAS ==========
     hoy = datetime.now().strftime("%Y-%m-%d")
     produccion_hoy = [p for p in produccion if p["fecha"] == hoy]
     total_hoy = sum(p["total_huevos"] for p in produccion_hoy) if produccion_hoy else 0
@@ -95,71 +95,21 @@ def mostrar_inicio():
     
     st.markdown("---")
     
-    # Módulos
+    # ========== TÍTULO DE MÓDULOS (SOLO INFORMATIVO) ==========
     st.markdown("""
-    <div style="text-align:center;margin-bottom:22px;">
-        <div style="font-size:24px;font-weight:800;color:#FFD600;letter-spacing:3px;text-transform:uppercase;">
-            📋 Módulos del Sistema
+    <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:20px;font-weight:700;color:rgba(255,255,255,0.2);letter-spacing:3px;text-transform:uppercase;">
+            📋 Utiliza el menú lateral para navegar
         </div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.25);margin-top:2px;letter-spacing:2px;">
-            SELECCIONA UN MÓDULO PARA COMENZAR
+        <div style="font-size:13px;color:rgba(255,255,255,0.15);margin-top:2px;letter-spacing:2px;">
+            SELECCIONA UN MÓDULO EN EL PANEL IZQUIERDO
         </div>
     </div>
     """, unsafe_allow_html=True)
     
-    modulos = [
-        {"nombre": "🐔 Producción", "gradient": "linear-gradient(135deg, #2E7D32, #43A047)", "key": "produccion", "desc": "Registro diario de huevos"},
-        {"nombre": "💰 Ventas", "gradient": "linear-gradient(135deg, #F9A825, #FFD54F)", "key": "ventas", "desc": "Gestión de ventas"},
-        {"nombre": "📦 Inventario", "gradient": "linear-gradient(135deg, #1976D2, #42A5F5)", "key": "inventario", "desc": "Stock en bodega 1"},
-        {"nombre": "🏷️ Categorías", "gradient": "linear-gradient(135deg, #7B1FA2, #AB47BC)", "key": "categorias", "desc": "Gestionar categorías"},
-        {"nombre": "📊 Reportes", "gradient": "linear-gradient(135deg, #E65100, #FB8C00)", "key": "reportes", "desc": "Ver reportes"},
-        {"nombre": "👥 Usuarios", "gradient": "linear-gradient(135deg, #00695C, #00897B)", "key": "usuarios", "desc": "Gestionar usuarios"},
-        {"nombre": "⚙️ Configuración", "gradient": "linear-gradient(135deg, #455A64, #78909C)", "key": "configuracion", "desc": "Configurar galpones"},
-    ]
-    
-    for i in range(0, len(modulos), 3):
-        cols = st.columns(3)
-        for j, col in enumerate(cols):
-            idx = i + j
-            if idx < len(modulos):
-                mod = modulos[idx]
-                with col:
-                    if st.button(
-                        f"{mod['nombre']}\n{mod['desc']}",
-                        key=f"card_{mod['key']}",
-                        use_container_width=True
-                    ):
-                        st.session_state.menu_seleccionado = mod['key']
-                        st.rerun()
-                    
-                    st.markdown(f"""
-                    <style>
-                        div[data-testid="stButton"] button[key="card_{mod['key']}"] {{
-                            background: {mod['gradient']} !important;
-                            color: white !important;
-                            border-radius: 20px !important;
-                            padding: 30px 10px !important;
-                            height: auto !important;
-                            min-height: 130px !important;
-                            text-align: center !important;
-                            font-size: 20px !important;
-                            font-weight: 700 !important;
-                            box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
-                            border: 1px solid rgba(255,255,255,0.06) !important;
-                            line-height: 2 !important;
-                            white-space: pre-line !important;
-                            transition: all 0.4s ease !important;
-                        }}
-                        div[data-testid="stButton"] button[key="card_{mod['key']}"]:hover {{
-                            transform: translateY(-8px) scale(1.02) !important;
-                            box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
-                        }}
-                    </style>
-                    """, unsafe_allow_html=True)
-    
     st.markdown("---")
     
-    # Últimas producciones
+    # ========== ÚLTIMAS PRODUCCIONES ==========
     st.markdown("""
     <div style="background:rgba(255,255,255,0.02);border-radius:18px;padding:20px 26px;border:1px solid rgba(255,255,255,0.04);">
         <div style="font-size:17px;font-weight:700;color:#FFD600;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
